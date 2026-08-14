@@ -12,7 +12,7 @@ import {
 
 const DJANGO_API =
   import.meta.env.VITE_DJANGO_API ||
-  "http://127.0.0.1:8000/api";
+    "https://ai-interview-simulator-pfpg.onrender.com/api";
 
 const getToken = (): string | null => {
   return (
