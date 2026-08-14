@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from django.db import transaction
 import random
 import os
 import uuid
@@ -29,18 +30,26 @@ def register_user(request):
     serializer = RegisterSerializer(data=request.data)
 
     if serializer.is_valid():
-        user = serializer.save()
+        try:
+            with transaction.atomic():
+                user = serializer.save()
 
-        otp = str(random.randint(100000, 999999))
+                otp = str(random.randint(100000, 999999))
 
-        user.otp = otp
-        user.otp_verified = False
-        user.is_active = False
-        user.save()
+                user.otp = otp
+                user.otp_verified = False
+                user.is_active = False
+                user.save()
 
-        send_otp(user.email, otp)
+                send_otp(user.email, otp)
 
-        return Response({"message": "OTP sent successfully"})
+            return Response({"message": "OTP sent successfully"})
+
+        except Exception as e:
+            return Response(
+                {"error": "Unable to send OTP. Please try again."},
+                status=500,
+            )
 
     return Response(serializer.errors, status=400)
 
