@@ -1,29 +1,28 @@
-from django.conf import settings
-from django.core.mail import send_mail
+import os
+import requests
 
 
 def send_otp(email, otp):
-    subject = "AI Interview Simulator - Email Verification OTP"
+    api_key = os.getenv("RESEND_API_KEY")
 
-    message = f"""
-Hello,
-
-Your OTP for AI Interview Simulator is:
-
-{otp}
-
-This OTP is valid for 10 minutes.
-
-Do not share this OTP with anyone.
-
-Regards,
-AI Interview Simulator Team
-"""
-
-    send_mail(
-        subject,
-        message,
-        settings.EMAIL_HOST_USER,
-        [email],
-        fail_silently=False,
+    response = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "from": "AI Interview Simulator <onboarding@resend.dev>",
+            "to": [email],
+            "subject": "AI Interview Simulator - Email Verification OTP",
+            "html": f"""
+                <h2>Email Verification</h2>
+                <p>Your OTP is:</p>
+                <h1>{otp}</h1>
+                <p>This OTP is valid for 10 minutes.</p>
+            """,
+        },
+        timeout=15,
     )
+
+    response.raise_for_status()
