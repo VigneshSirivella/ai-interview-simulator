@@ -1,0 +1,6 @@
+{
+  "name": "AI Interview Simulator",
+  "description": "An AI-powered startup mock interview platform providing real-time dynamic technical & HR interviews, speech recognition, answer evaluation, resume ATS parsing, performance analytics, PDF reports, practice modules, and certifications.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
