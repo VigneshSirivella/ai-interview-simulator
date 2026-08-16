@@ -28,8 +28,9 @@ def generate_interview(request):
 
         try:
             resume = Resume.objects.get(user=request.user)
+            resume_text = resume.extracted_text
         except Resume.DoesNotExist:
-            return Response({"error": "Upload resume first"}, status=404)
+            resume_text = ""
 
         company = request.data.get("company", "General Company")
 
@@ -40,7 +41,7 @@ def generate_interview(request):
         camera_enabled = request.data.get("camera_enabled", False)
 
         questions = generate_questions(
-            resume.extracted_text,
+            resume_text,
             interview_type,
             difficulty,
             total_questions,
