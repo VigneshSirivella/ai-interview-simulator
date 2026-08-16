@@ -3,23 +3,26 @@ import requests
 
 
 def send_otp(email, otp):
-    api_key = os.getenv("RESEND_API_KEY")
-
+    api_key = os.getenv("BREVO_API_KEY")
     response = requests.post(
-        "https://api.resend.com/emails",
+        "https://api.brevo.com/v3/smtp/email",
         headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
+            "accept": "application/json",
+            "api-key": api_key,
+            "content-type": "application/json",
         },
         json={
-            "from": "AI Interview Simulator <onboarding@resend.dev>",
-            "to": [email],
+            "sender": {
+                "name": "AI Interview Simulator",
+                "email": "vigni9866@gmail.com",
+            },
+            "to": [{"email": email}],
             "subject": "AI Interview Simulator - Email Verification OTP",
-            "html": f"""
-                <h2>Email Verification</h2>
-                <p>Your OTP is:</p>
+            "htmlContent": f"""
+                <h2>AI Interview Simulator</h2>
+                <p>Your verification OTP is:</p>
                 <h1>{otp}</h1>
-                <p>This OTP is valid for 10 minutes.</p>
+                <p>Do not share this OTP with anyone.</p>
             """,
         },
         timeout=15,
