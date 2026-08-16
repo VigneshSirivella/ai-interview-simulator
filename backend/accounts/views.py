@@ -165,6 +165,8 @@ def reset_password(request):
 
         user.set_password(new_password)
         user.otp = ""
+        user.is_active = True
+        user.otp_verified = True
         user.save()
 
         return Response({"message": "Password updated successfully"})
