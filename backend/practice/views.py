@@ -1395,6 +1395,72 @@ def evaluate_practice_answer(request):
         {},
     )
 
+    # =====================================================
+    # DIRECT EVALUATION FOR OBJECTIVE QUESTIONS
+    # =====================================================
+
+    if question_type in ["MCQ", "Fill in Blanks"]:
+        if question_type == "MCQ":
+            correct_answer = str(question_data.get("correctAnswer", "")).strip()
+
+        else:
+            correct_answer = str(question_data.get("fillBlankAnswer", "")).strip()
+
+        submitted_answer = str(user_answer).strip()
+
+        is_correct = submitted_answer.casefold() == correct_answer.casefold()
+
+        score = 100 if is_correct else 0
+
+        evaluation = {
+            "score": score,
+            "correct": is_correct,
+            "correctness": ("Correct" if is_correct else "Incorrect"),
+            "feedback": (
+                "Correct answer."
+                if is_correct
+                else f"The correct answer is: {correct_answer}"
+            ),
+            "explanation": (question_data.get("explanation", "")),
+            "timeComplexity": "",
+            "spaceComplexity": "",
+            "strengths": (["Correctly identified the answer."] if is_correct else []),
+            "improvements": (
+                [] if is_correct else ["Review the concept and try the question again."]
+            ),
+        }
+
+        attempt, created = PracticeAttempt.objects.update_or_create(
+            user=request.user,
+            question_id=question_id,
+            defaults={
+                "question_title": question_title,
+                "question_type": question_type,
+                "topic_or_language": topic_or_language,
+                "difficulty": difficulty,
+                "question_data": question_data,
+                "user_answer": user_answer,
+                "submitted_code": code,
+                "programming_language": programming_language,
+                "score": evaluation["score"],
+                "feedback": evaluation["feedback"],
+                "strengths": evaluation["strengths"],
+                "improvements": evaluation["improvements"],
+            },
+        )
+
+        return Response(
+            {
+                "evaluation": evaluation,
+                "attempt": {
+                    "id": attempt.id,
+                    "questionId": attempt.question_id,
+                    "score": attempt.score,
+                    "saved": True,
+                },
+            }
+        )
+
     if not question_id:
         question_id = question_title.strip().lower().replace(" ", "-")
 

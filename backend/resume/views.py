@@ -270,10 +270,22 @@ Rules:
         return Response({"result": result})
 
     except Exception as error:
+        error_text = str(error)
+
         print(
             "Resume analysis error:",
             error,
         )
+
+        if (
+            "429" in error_text
+            or "RESOURCE_EXHAUSTED" in error_text
+            or "quota" in error_text.lower()
+        ):
+            return Response(
+                {"error": "AI quota reached. Please try again after some time."},
+                status=429,
+            )
 
         return Response(
             {"error": "Unable to analyze resume right now."},
