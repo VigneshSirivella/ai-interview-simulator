@@ -185,69 +185,58 @@ def submit_answer(request):
 @permission_classes([IsAuthenticated])
 def final_report(request, session_id):
     try:
-        session = InterviewSession.objects.get(id=session_id, user=request.user)
+        session = InterviewSession.objects.get(
+            id=session_id,
+            user=request.user,
+        )
     except InterviewSession.DoesNotExist:
-        return Response({"error": "Interview session not found"}, status=404)
+        return Response(
+            {"error": "Interview session not found"},
+            status=404,
+        )
+
+    # Only completed interviews should have a final report
+    if session.status != "completed":
+        return Response(
+            {"error": "Interview is not completed yet"},
+            status=400,
+        )
 
     answers = session.answers.all().order_by("question_number")
 
-    if answers.count() < len(session.questions):
-        return Response({"error": "Interview is not completed yet"}, status=400)
+    # Read the already-saved interview results.
+    # Do NOT regenerate the AI report every time
+    # the candidate opens View Feedback.
 
-    questions_and_answers = []
+    candidate_name = (
+        getattr(request.user, "name", "") or getattr(request.user, "username", "") or ""
+    )
 
-    for item in answers:
-        questions_and_answers.append(
-            {
-                "question": item.question,
-                "answer": item.answer,
-                "score": item.score,
-                "feedback": item.feedback,
-            }
-        )
-
-    report = generate_final_report(questions_and_answers)
-
-    session.score = report.get("overall_score", 0)
-
-    session.technical_score = report.get("technical_score", 0)
-
-    session.communication_score = report.get("communication_score", 0)
-
-    session.feedback = report.get("final_feedback", "")
-
-    session.strengths = report.get("strengths", [])
-
-    session.weaknesses = report.get("weaknesses", [])
-
-    session.improvements = report.get("improvements", [])
-
-    session.status = "completed"
-    session.ended_at = timezone.now()
-
-    session.save()
+    candidate_email = getattr(request.user, "email", "") or ""
 
     report_data = {
         "id": str(session.id),
         "interviewId": str(session.id),
         "userId": str(session.user.id),
+        "candidateName": candidate_name,
+        "candidateEmail": candidate_email,
         "company": session.company or "General Company",
         "role": session.role or "Software Engineer",
         "difficulty": session.difficulty,
         "type": session.interview_type,
-        "date": session.created_at.isoformat(),
-        "overallScore": session.score,
+        "date": (session.created_at.isoformat() if session.created_at else None),
+        "overallScore": session.score or 0,
         "radarMetrics": {
-            "technical": session.technical_score,
-            "communication": session.communication_score,
-            "problemSolving": session.score,
-            "confidence": session.score,
-            "systemDesignCulture": session.score,
+            "technical": session.technical_score or 0,
+            "communication": session.communication_score or 0,
+            "problemSolving": session.score or 0,
+            "confidence": session.score or 0,
+            "systemDesignCulture": session.score or 0,
         },
-        "topStrengths": session.strengths,
-        "keyWeaknesses": session.weaknesses,
-        "actionableSuggestions": session.improvements,
-        "finalAiRemark": session.feedback,
+        "topStrengths": session.strengths or [],
+        "keyWeaknesses": session.weaknesses or [],
+        "actionableSuggestions": session.improvements or [],
+        "finalAiRemark": session.feedback or "",
         "questions": [
             {
                 "id": f"question-{item.question_number}",
@@ -256,10 +245,10 @@ def final_report(request, session_id):
                 "question": item.question,
                 "userAnswer": item.answer,
                 "evaluation": {
-                    "score": item.score,
-                    "feedback": item.feedback,
-                    "strengths": item.strengths,
-                    "weaknesses": item.improvements,
+                    "score": item.score or 0,
+                    "feedback": item.feedback or "",
+                    "strengths": item.strengths or [],
+                    "weaknesses": item.improvements or [],
                 },
             }
             for item in answers
