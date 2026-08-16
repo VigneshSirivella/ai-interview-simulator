@@ -60,6 +60,40 @@ def dashboard_stats(request):
         )
 
     # =====================================================
+    # Skill insights from completed interviews
+    # =====================================================
+
+    strong_topics = []
+    weak_topics = []
+
+    for session in completed:
+        strengths = session.strengths or []
+        weaknesses = session.weaknesses or []
+
+        # Handle both list and string values safely
+        if isinstance(strengths, str):
+            strengths = [strengths]
+
+        if isinstance(weaknesses, str):
+            weaknesses = [weaknesses]
+
+        for strength in strengths:
+            strength = str(strength).strip()
+
+            if strength and strength not in strong_topics:
+                strong_topics.append(strength)
+
+        for weakness in weaknesses:
+            weakness = str(weakness).strip()
+
+            if weakness and weakness not in weak_topics:
+                weak_topics.append(weakness)
+
+    # Keep dashboard insights concise
+    strong_topics = strong_topics[:5]
+    weak_topics = weak_topics[:5]
+
+    # =====================================================
     # Practice statistics
     # =====================================================
 
@@ -131,8 +165,8 @@ def dashboard_stats(request):
             "stats": {
                 "totalInterviews": total_interviews,
                 "averageScore": average_score,
-                "strongTopics": [],
-                "weakTopics": [],
+                "strongTopics": strong_topics,
+                "weakTopics": weak_topics,
                 "overallAccuracy": average_score,
                 "completionRate": (100 if total_interviews > 0 else 0),
                 "weeklyProgress": [],

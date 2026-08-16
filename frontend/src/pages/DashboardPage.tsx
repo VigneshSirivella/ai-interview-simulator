@@ -111,11 +111,25 @@ export const DashboardPage: React.FC = () => {
   const recentPracticeAttempts =
     practiceStats?.recentAttempts ?? [];
 
-  const strongTopics =
-    stats?.strongTopics ?? [];
+  const strongTopics = useMemo(() => {
+    const topics = interviewHistory.flatMap(
+      (interview) => interview.strengths || []
+    );
 
-  const weakTopics =
-    stats?.weakTopics ?? [];
+    return [...new Set(topics)]
+      .filter(Boolean)
+      .slice(0, 5);
+  }, [interviewHistory]);
+
+  const weakTopics = useMemo(() => {
+    const topics = interviewHistory.flatMap(
+      (interview) => interview.weaknesses || []
+    );
+
+    return [...new Set(topics)]
+      .filter(Boolean)
+      .slice(0, 5);
+  }, [interviewHistory]);
 
   const hasInterviewActivity =
     totalInterviews > 0 ||
@@ -522,6 +536,7 @@ export const DashboardPage: React.FC = () => {
                   />
 
                   <Tooltip
+                    formatter={(value) => [`${value}%`, "Score"]}
                     contentStyle={{
                       backgroundColor: "#0f172a",
                       borderColor: "#334155",
@@ -537,6 +552,15 @@ export const DashboardPage: React.FC = () => {
                     strokeWidth={3}
                     fillOpacity={1}
                     fill="url(#scoreColor)"
+                    dot={{
+                      r: 6,
+                      fill: "#6366f1",
+                      stroke: "#ffffff",
+                      strokeWidth: 2,
+                    }}
+                    activeDot={{
+                      r: 8,
+                    }}
                   />
                 </AreaChart>
               </ResponsiveContainer>

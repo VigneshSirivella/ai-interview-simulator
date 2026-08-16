@@ -6,7 +6,10 @@ import React, {
 import {
   useParams,
   Link,
+  useNavigate,
 } from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
 
 import confetti from "canvas-confetti";
 
@@ -38,7 +41,12 @@ import {
   MessageSquare,
 } from "lucide-react";
 
+
 export const ResultPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const { user } = useAuth();
+
   const { reportId } =
     useParams<{ reportId: string }>();
 
@@ -108,14 +116,37 @@ export const ResultPage: React.FC = () => {
   }, [reportId]);
 
   const handleDownloadPDF = () => {
-    if (!report) {
-      return;
-    }
+  if (!report) {
+    return;
+  }
 
-    generateCandidatePDFReport(
-      report
+  const candidateName =
+    user?.name?.trim();
+
+  if (!candidateName) {
+    alert(
+      "Please set your name in the Profile section before downloading the PDF report."
     );
+
+    navigate("/profile");
+    return;
+  }
+
+  const reportWithCandidateDetails = {
+    ...report,
+
+    candidateName: candidateName,
+
+    candidateEmail:
+      user?.email?.trim() ||
+      report.candidateEmail ||
+      "Not available",
   };
+
+  generateCandidatePDFReport(
+    reportWithCandidateDetails
+  );
+};
 
   const handleSubmitFeedback =
     async () => {
