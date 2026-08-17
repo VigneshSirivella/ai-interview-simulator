@@ -31,7 +31,14 @@ def upload_resume(request):
     resume.file = file
     resume.save()
 
-    text = extract_text(resume.file.path)
+    try:
+        text = extract_text(resume.file.path)
+    except Exception as e:
+        print("RESUME UPLOAD ERROR:", repr(e))
+        return Response(
+            {"error": str(e)},
+            status=500,
+        )
 
     resume.extracted_text = text
 
