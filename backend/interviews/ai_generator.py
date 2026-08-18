@@ -120,6 +120,21 @@ Example format:
         f"Why should we hire you for the {role} role?",
         "Explain one technical problem you faced and how you solved it.",
         "What are your strongest technical skills and how have you used them?",
+        "Explain the difference between a list and a tuple in Python.",
+        "What is the difference between a process and a thread?",
+        "Explain how indexing improves database query performance.",
+        "What is the difference between TCP and UDP?",
+        "Explain the concept of inheritance in object-oriented programming.",
+        "What is the time complexity of searching in a Python set?",
+        "How would you detect duplicate elements in an array efficiently?",
+        "Explain shallow copy and deep copy in Python.",
+        "What happens when you type a URL into a browser?",
+        "Explain normalization in DBMS.",
+        "What is deadlock in an operating system?",
+        "Explain REST API and how frontend communicates with backend.",
+        "How would you debug a slow web application?",
+        "Tell me about a difficult bug you fixed in one of your projects.",
+        "Where do you see yourself improving technically over the next two years?",
     ]
 
     try:
@@ -148,7 +163,10 @@ Example format:
             repr(error),
         )
 
-        return fallback_questions[:total_questions]
+        return random.sample(
+            fallback_questions,
+            min(total_questions, len(fallback_questions)),
+        )
 
 
 def evaluate_answer(
