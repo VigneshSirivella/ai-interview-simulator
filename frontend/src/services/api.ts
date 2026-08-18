@@ -632,25 +632,7 @@ async submitInterviewFeedback(
   ): Promise<{
     report: FinalReport;
   }> {
-    const endResponse = await fetch(
-      `${DJANGO_API}/interviews/end/`,
-      {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({
-          session_id: sessionId,
-          reason: "completed",
-          note: "",
-        }),
-      }
-    );
-
-    await parseResponse(
-      endResponse,
-      "Failed to complete the interview."
-    );
-
-    const reportResponse = await fetch(
+    const response = await fetch(
       `${DJANGO_API}/interviews/report/${sessionId}/`,
       {
         method: "GET",
@@ -661,10 +643,10 @@ async submitInterviewFeedback(
     return parseResponse<{
       report: FinalReport;
     }>(
-      reportResponse,
+      response,
       "Failed to generate the final interview report."
     );
-  },
+  },  
 
   // =====================================================
   // Reports
