@@ -284,17 +284,118 @@ Rules:
             error,
         )
 
-        if (
-            "429" in error_text
-            or "RESOURCE_EXHAUSTED" in error_text
-            or "quota" in error_text.lower()
-        ):
-            return Response(
-                {"error": "AI quota reached. Please try again after some time."},
-                status=429,
-            )
+        # Local fallback when Gemini is unavailable or quota is exhausted
+        words = resume_text.lower()
+
+        common_skills = [
+            "python",
+            "java",
+            "javascript",
+            "react",
+            "django",
+            "flask",
+            "mysql",
+            "postgresql",
+            "html",
+            "css",
+            "git",
+            "github",
+            "docker",
+            "aws",
+            "machine learning",
+            "deep learning",
+            "data structures",
+            "algorithms",
+        ]
+
+        extracted_skills = [skill for skill in common_skills if skill in words]
+
+        role_skill_map = {
+            "Software Engineer": [
+                "python",
+                "java",
+                "data structures",
+                "algorithms",
+                "git",
+                "sql",
+            ],
+            "Data Scientist": [
+                "python",
+                "machine learning",
+                "deep learning",
+                "sql",
+                "statistics",
+                "pandas",
+            ],
+            "Frontend Developer": [
+                "html",
+                "css",
+                "javascript",
+                "react",
+                "git",
+            ],
+            "Backend Developer": [
+                "python",
+                "django",
+                "flask",
+                "mysql",
+                "postgresql",
+                "docker",
+            ],
+        }
+
+        expected_skills = role_skill_map.get(
+            target_role,
+            [],
+        )
+
+        missing_skills = [
+            skill for skill in expected_skills if skill not in extracted_skills
+        ]
+
+        ats_score = min(
+            100,
+            55 + (len(extracted_skills) * 5),
+        )
+
+        fallback_result = {
+            "atsScore": ats_score,
+            "extractedName": "",
+            "extractedEmail": "",
+            "extractedSkills": extracted_skills,
+            "missingSkills": missing_skills,
+            "formattingScore": 75,
+            "keywordDensityScore": min(
+                100,
+                50 + (len(extracted_skills) * 5),
+            ),
+            "bulletPointFeedback": [
+                "Use clear and concise bullet points.",
+                "Add measurable achievements where possible.",
+            ],
+            "actionableTips": [
+                "Add role-specific technical keywords.",
+                "Highlight projects with clear responsibilities and outcomes.",
+                "Keep the resume concise and ATS friendly.",
+            ],
+            "suggestedRoles": [
+                target_role,
+            ],
+            "parsedSummary": (
+                "Resume analyzed using local fallback because "
+                "AI analysis is temporarily unavailable."
+            ),
+            "candidateExperience": "",
+            "recommendedPrepTopics": missing_skills,
+        }
 
         return Response(
-            {"error": "Unable to analyze resume right now."},
-            status=500,
+            {
+                "result": fallback_result,
+                "fallback": True,
+                "message": (
+                    "AI analysis is temporarily unavailable. "
+                    "Local ATS analysis was used instead."
+                ),
+            }
         )
