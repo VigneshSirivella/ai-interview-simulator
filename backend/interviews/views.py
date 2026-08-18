@@ -167,14 +167,77 @@ def submit_answer(request):
             }
         )
 
+    # =====================================================
+    # LAST QUESTION - FINALIZE INTERVIEW
+    # =====================================================
+
+    answers = session.answers.all().order_by("question_number")
+
+    questions_and_answers = []
+
+    for item in answers:
+        questions_and_answers.append(
+            {
+                "question": item.question,
+                "answer": item.answer,
+                "score": item.score,
+                "feedback": item.feedback,
+            }
+        )
+
+    final_evaluation = generate_final_report(questions_and_answers)
+
+    session.score = final_evaluation.get(
+        "overall_score",
+        0,
+    )
+
+    session.technical_score = final_evaluation.get(
+        "technical_score",
+        0,
+    )
+
+    session.communication_score = final_evaluation.get(
+        "communication_score",
+        0,
+    )
+
+    session.feedback = final_evaluation.get(
+        "final_feedback",
+        "",
+    )
+
+    session.strengths = final_evaluation.get(
+        "strengths",
+        [],
+    )
+
+    session.weaknesses = final_evaluation.get(
+        "weaknesses",
+        [],
+    )
+
+    session.improvements = final_evaluation.get(
+        "improvements",
+        [],
+    )
+
+    session.status = "completed"
+    session.ended_at = timezone.now()
+
+    session.save()
+
     return Response(
         {
-            "message": "Answer evaluated successfully",
+            "message": "Interview completed successfully",
             "session_id": session.id,
             "score": evaluation.get("score", 0),
             "feedback": evaluation.get("feedback", ""),
             "strengths": evaluation.get("strengths", []),
-            "improvements": evaluation.get("improvements", []),
+            "improvements": evaluation.get(
+                "improvements",
+                [],
+            ),
             "interview_completed": True,
             "total_questions": len(session.questions),
         }
