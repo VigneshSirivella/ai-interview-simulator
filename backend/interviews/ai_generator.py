@@ -194,12 +194,36 @@ Scoring Rules:
 - Do not add markdown.
 """
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt,
-    )
+    fallback_evaluation = {
+        "score": 70,
+        "feedback": (
+            "Your answer was recorded successfully. "
+            "AI evaluation is temporarily unavailable."
+        ),
+        "strengths": ["Answer submitted successfully."],
+        "improvements": ["Review the answer and continue practicing."],
+    }
 
-    return json.loads(response.text.strip())
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+        )
+
+        result = json.loads(response.text.strip())
+
+        if not isinstance(result, dict):
+            raise ValueError("Gemini did not return a JSON object")
+
+        return result
+
+    except Exception as error:
+        print(
+            "ANSWER EVALUATION GEMINI ERROR:",
+            repr(error),
+        )
+
+        return fallback_evaluation
 
 
 def generate_final_report(questions_and_answers):
