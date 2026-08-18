@@ -114,12 +114,20 @@ Example format:
 ]
 """
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt,
-    )
+    fallback_questions = [
+        "Tell me about one of your projects and your contribution.",
+        f"Why do you want to work at {company}?",
+        f"Why should we hire you for the {role} role?",
+        "Explain one technical problem you faced and how you solved it.",
+        "What are your strongest technical skills and how have you used them?",
+    ]
 
     try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+        )
+
         questions = ast.literal_eval(response.text.strip())
 
         if not isinstance(questions, list):
@@ -129,21 +137,18 @@ Example format:
             str(question).strip() for question in questions if str(question).strip()
         ]
 
+        if not questions:
+            raise ValueError("Gemini returned no questions")
+
         return questions[:total_questions]
 
     except Exception as error:
         print(
-            "Question generation parsing error:",
-            error,
+            "QUESTION GENERATION GEMINI ERROR:",
+            repr(error),
         )
 
-        return [
-            "Tell me about one of your projects and your contribution.",
-            f"Why do you want to work at {company}?",
-            f"Why should we hire you for the {role} role?",
-            "Explain one technical problem you faced and how you solved it.",
-            "What are your strongest technical skills and how have you used them?",
-        ][:total_questions]
+        return fallback_questions[:total_questions]
 
 
 def evaluate_answer(
