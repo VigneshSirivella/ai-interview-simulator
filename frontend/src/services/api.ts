@@ -574,6 +574,7 @@ async submitInterviewFeedback(
 }): Promise<{
   evaluation: any;
   question: any;
+  interviewCompleted: boolean;
 }> {
   const questionNumber = Number(
     data.questionId.replace(
@@ -608,22 +609,18 @@ async submitInterviewFeedback(
   return {
     evaluation: {
       score: result.score ?? 0,
-      accuracy:
-        result.score ?? 0,
-      clarity:
-        result.score ?? 0,
-      technicalDepth:
-        result.score ?? 0,
-      feedback:
-        result.feedback || "",
-      strengths:
-        result.strengths || [],
-      weaknesses:
-        result.improvements || [],
+      accuracy: result.score ?? 0,
+      clarity: result.score ?? 0,
+      technicalDepth: result.score ?? 0,
+      feedback: result.feedback || "",
+      strengths: result.strengths || [],
+      weaknesses: result.improvements || [],
     },
 
-    question:
-      result.next_question || null,
+    question: result.next_question || null,
+
+    interviewCompleted:
+      result.interview_completed === true,
   };
 },
 

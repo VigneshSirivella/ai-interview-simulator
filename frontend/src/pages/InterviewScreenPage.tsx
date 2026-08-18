@@ -459,6 +459,14 @@ export const InterviewScreenPage: React.FC = () => {
         setEvaluation(
           response.evaluation
         );
+        if (response.interviewCompleted) {
+          sessionStorage.removeItem(
+            `interview-options-${sessionId}`
+          );
+
+          navigate(`/result/${sessionId}`);
+          return;
+        }
       } catch (requestError) {
         console.error(
           "Answer evaluation error:",
