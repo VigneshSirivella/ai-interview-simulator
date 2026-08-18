@@ -197,9 +197,27 @@ Scoring Rules:
     return json.loads(response.text.strip())
 
 
-def generate_final_report(
-    questions_and_answers,
-):
+def generate_final_report(questions_and_answers):
+    scores = [float(item.get("score", 0) or 0) for item in questions_and_answers]
+
+    average_score = round(sum(scores) / len(scores), 2) if scores else 0
+
+    fallback_report = {
+        "overall_score": average_score,
+        "technical_score": average_score,
+        "communication_score": average_score,
+        "strengths": ["Completed the interview questions successfully."],
+        "weaknesses": ["Review individual question feedback for improvement areas."],
+        "improvements": [
+            "Continue practicing technical concepts and clear communication."
+        ],
+        "final_feedback": (
+            f"Interview completed with an average score of "
+            f"{average_score}/100. Review the feedback for each "
+            f"question to identify areas for improvement."
+        ),
+    }
+
     prompt = f"""
 You are an expert technical interviewer.
 
@@ -217,25 +235,27 @@ Return ONLY valid JSON in this format:
     "communication_score": 0,
     "strengths": [],
     "weaknesses": [],
+    "improvements": [],
     "final_feedback": ""
 }}
 
-Rules:
-
-- All scores must be between 0 and 100.
-- Base the report only on the candidate's
-  actual interview answers.
-- Mention genuine strengths.
-- Mention genuine weaknesses.
-- Give practical improvement suggestions
-  inside final_feedback.
-- Keep feedback clear and concise.
-- Do not add markdown.
+All scores must be between 0 and 100.
+Base the report only on the candidate's actual answers.
+Return valid JSON only.
 """
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt,
-    )
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+        )
 
-    return json.loads(response.text.strip())
+        return json.loads(response.text.strip())
+
+    except Exception as error:
+        print(
+            "FINAL REPORT GEMINI ERROR:",
+            repr(error),
+        )
+
+        return fallback_report
