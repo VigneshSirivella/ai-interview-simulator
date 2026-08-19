@@ -402,9 +402,12 @@ export const DashboardPage: React.FC = () => {
 
             <div className="flex flex-col gap-3">
               {recentPracticeAttempts.map((attempt) => (
-                <div
+                <Link
                   key={attempt.id}
-                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  to={`/practice?question=${encodeURIComponent(
+                    attempt.questionId
+                  )}`}
+                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition"
                 >
                   <div>
                     <p className="text-sm font-bold text-slate-900 dark:text-white">
@@ -416,13 +419,17 @@ export const DashboardPage: React.FC = () => {
                       {attempt.questionType} •{" "}
                       {attempt.difficulty}
                     </p>
+
+                    <p className="text-xs text-indigo-500 mt-2 font-semibold">
+                      View your answer and feedback
+                    </p>
                   </div>
 
                   <ScoreBadge
                     score={attempt.score ?? 0}
                     size="sm"
                   />
-                </div>
+                </Link>
               ))}
             </div>
           </div>
