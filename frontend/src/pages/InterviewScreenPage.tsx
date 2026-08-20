@@ -64,6 +64,14 @@ export const InterviewScreenPage: React.FC = () => {
   const [isEvaluating, setIsEvaluating] =
     useState(false);
 
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [
+    isCurrentAnswerSaved,
+    setIsCurrentAnswerSaved,
+  ] = useState(false);
+
   const [
     isGeneratingQuestion,
     setIsGeneratingQuestion,
@@ -285,6 +293,12 @@ export const InterviewScreenPage: React.FC = () => {
     let expiryHandled = false;
 
     const updateTimer = async () => {
+      if (
+        isEvaluating ||
+        isSubmitting
+      ) {
+        return;
+      }
       const secondsLeft = Math.max(
         Math.ceil(
           (endTime - Date.now()) / 1000
@@ -355,6 +369,8 @@ export const InterviewScreenPage: React.FC = () => {
     sessionId,
     totalQuestions,
     navigate,
+    isEvaluating,
+    isSubmitting,
   ]);
 
   /*
@@ -425,6 +441,54 @@ export const InterviewScreenPage: React.FC = () => {
           response.question
         );
 
+        const savedAnswer =
+            response.savedAnswer || "";
+
+        setIsCurrentAnswerSaved(
+          Boolean(response.savedAnswer)
+        );
+
+          if (savedAnswer === "[SKIPPED]") {
+            setUserAnswer("");
+            setSelectedOption("");
+            setCodeAnswer("");
+            setEvaluation(null);
+          } else if (
+            response.question?.questionType === "MCQ" ||
+            (
+              Array.isArray(
+                response.question?.options
+              ) &&
+              response.question.options.length > 0
+            )
+          ) {
+            setSelectedOption(savedAnswer);
+          } else {
+            const codeMarker =
+              "\n\n[Code Solution]:\n";
+
+            if (
+              savedAnswer.includes(codeMarker)
+            ) {
+              const [
+                textPart,
+                codePart,
+              ] = savedAnswer.split(
+                codeMarker
+              );
+
+              setUserAnswer(
+                textPart || ""
+              );
+
+              setCodeAnswer(
+                codePart || ""
+              );
+            } else {
+              setUserAnswer(savedAnswer);
+            }
+          }
+
         if (
           response.totalQuestions &&
           response.totalQuestions > 0
@@ -435,7 +499,8 @@ export const InterviewScreenPage: React.FC = () => {
         }
 
         if (
-          response.question?.codeSnippet
+          response.question?.codeSnippet &&
+          !response.savedAnswer
         ) {
           setCodeAnswer(
             response.question.codeSnippet
@@ -575,7 +640,8 @@ export const InterviewScreenPage: React.FC = () => {
     async () => {
       if (
         !sessionId ||
-        !currentQuestion
+        !currentQuestion ||
+        isSubmitting
       ) {
         return;
       }
@@ -593,6 +659,92 @@ export const InterviewScreenPage: React.FC = () => {
         return;
       }
 
+      setIsSubmitting(true);
+      setError("");
+
+      try {
+        const response =
+          await apiService.evaluateAnswer({
+            sessionId,
+            questionId:
+              currentQuestion.id,
+            userAnswer:
+              finalAnswer,
+            timeSpentSeconds:
+              secondsElapsed,
+            evaluate: false,
+          });
+
+        if (response.interviewCompleted) {
+          sessionStorage.removeItem(
+            `interview-options-${sessionId}`
+          );
+
+          localStorage.removeItem(
+            `interview-end-time-${sessionId}`
+          );
+
+          navigate(`/result/${sessionId}`);
+          return;
+        }
+
+        setEvaluation(null);
+        setUserAnswer("");
+        setCodeAnswer("");
+        setSelectedOption("");
+        setSecondsElapsed(0);
+
+        setCurrentQuestionIndex(
+          (current) => current + 1
+        );
+      } catch (requestError) {
+        console.error(
+          "Answer submission error:",
+          requestError
+        );
+
+        setError(
+          getApiError(
+            requestError,
+            "Unable to save your answer."
+          )
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+  const handleEvaluateAnswer =
+    async () => {
+      if (
+        !sessionId ||
+        !currentQuestion ||
+        isEvaluating
+      ) {
+        return;
+      }
+
+      const finalAnswer =
+        getFinalAnswer();
+
+      if (!finalAnswer) {
+        setError(
+          isMcqQuestion
+            ? "Select one option before evaluating."
+            : "Enter or speak your answer before evaluating."
+        );
+
+        return;
+      }
+
+      const evaluationPauseKey =
+        `interview-evaluation-pause-${sessionId}`;
+
+      localStorage.setItem(
+        evaluationPauseKey,
+        String(Date.now())
+      );
+
       setIsEvaluating(true);
       setError("");
 
@@ -606,12 +758,17 @@ export const InterviewScreenPage: React.FC = () => {
               finalAnswer,
             timeSpentSeconds:
               secondsElapsed,
+            evaluate: true,
           });
 
         setEvaluation(
           response.evaluation
         );
+
+        setIsCurrentAnswerSaved(true);
+
         setNextQuestionCountdown(10);
+
         if (response.interviewCompleted) {
           sessionStorage.removeItem(
             `interview-options-${sessionId}`
@@ -634,13 +791,51 @@ export const InterviewScreenPage: React.FC = () => {
           getApiError(
             requestError,
             "Unable to evaluate your answer."
-          )
+          ) 
         );
       } finally {
+        const evaluationPauseKey =
+          `interview-evaluation-pause-${sessionId}`;
+
+        const pauseStartedAt = Number(
+          localStorage.getItem(
+            evaluationPauseKey
+          )
+        );
+
+        const timerKey =
+          `interview-end-time-${sessionId}`;
+
+        const currentEndTime = Number(
+          localStorage.getItem(
+            timerKey
+          )
+        );
+
+        if (
+          pauseStartedAt &&
+          currentEndTime
+        ) {
+          const pausedMilliseconds =
+            Date.now() -
+            pauseStartedAt;
+
+          localStorage.setItem(
+            timerKey,
+            String(
+              currentEndTime +
+                pausedMilliseconds
+            )
+          );
+        }
+
+        localStorage.removeItem(
+          evaluationPauseKey
+        );
+
         setIsEvaluating(false);
       }
     };
-
 
   const handleSkipQuestion = async () => {
     if (
@@ -706,10 +901,31 @@ export const InterviewScreenPage: React.FC = () => {
 
 
   const handleNext = () => {
+    if (
+      answerAvailable &&
+      !isCurrentAnswerSaved
+    ) {
+      setError(
+        "You have an unsaved answer. Submit it before moving to the next question."
+      );
+      return;
+    }
+
+    if (
+      !answerAvailable &&
+      !isCurrentAnswerSaved
+    ) {
+      setError(
+        "Submit an answer or use Skip before moving to the next question."
+      );
+      return;
+    }
+
+    setError("");
+
     if (!isLastQuestion) {
       setCurrentQuestionIndex(
-        (current) =>
-          current + 1
+        (current) => current + 1
       );
 
       return;
@@ -755,6 +971,18 @@ export const InterviewScreenPage: React.FC = () => {
     ) {
       return;
     }
+
+    if (
+      answerAvailable &&
+      !isCurrentAnswerSaved
+    ) {
+      setError(
+        "You have an unsaved answer. Submit it before moving to the previous question."
+      );
+      return;
+    }
+
+    setError("");
 
     setCurrentQuestionIndex(
       (current) =>
@@ -1268,32 +1496,69 @@ export const InterviewScreenPage: React.FC = () => {
 
               )}
 
-              <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
+              <div className="flex flex-col gap-3">
 
-              <button
-                type="button"
-                onClick={handlePrevious}
-                disabled={
-                  currentQuestionIndex === 0
-                }
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 disabled:opacity-40"
-              >
-                <ChevronLeft className="inline w-4 h-4" />
-                Previous
-              </button>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 
-              <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="button"
+                    onClick={handlePrevious}
+                    disabled={
+                      currentQuestionIndex === 0 ||
+                      isSubmitting ||
+                      isEvaluating
+                    }
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 disabled:opacity-40"
+                  >
+                    <ChevronLeft className="inline w-4 h-4 mr-1" />
+                    Previous
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={
+                      isLastQuestion ||
+                      isSubmitting ||
+                      isEvaluating
+                    }
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40"
+                  >
+                    Next Question
+                    <ChevronRight className="inline w-4 h-4 ml-1" />
+                  </button>
+
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3 sm:items-center">
 
                 <button
                   type="button"
                   onClick={handleSkipQuestion}
                   disabled={
+                    isSubmitting ||
                     isEvaluating ||
                     Boolean(evaluation)
                   }
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-600 text-white disabled:opacity-40"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-amber-600 text-white text-sm font-semibold disabled:opacity-40"
                 >
-                  Skip Question
+                  Skip
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleEvaluateAnswer}
+                  disabled={
+                    !answerAvailable ||
+                    isSubmitting ||
+                    isEvaluating ||
+                    Boolean(evaluation)
+                  }
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold disabled:opacity-40"
+                >
+                  {isEvaluating
+                    ? "Evaluating..."
+                    : "Evaluate Answer"}
                 </button>
 
                 <button
@@ -1301,16 +1566,17 @@ export const InterviewScreenPage: React.FC = () => {
                   onClick={handleSubmitAnswer}
                   disabled={
                     !answerAvailable ||
+                    isSubmitting ||
                     isEvaluating ||
                     Boolean(evaluation)
                   }
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 disabled:opacity-40"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold disabled:opacity-40"
                 >
-                  <Send className="inline w-4 h-4 mr-2" />
+                  <Send className="inline w-4 h-4 mr-1.5" />
 
-                  {isEvaluating
-                    ? "Evaluating..."
-                    : "Submit and Evaluate"}
+                  {isSubmitting
+                    ? "Submitting..."
+                    : "Submit Answer"}
                 </button>
 
               </div>

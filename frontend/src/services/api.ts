@@ -527,6 +527,11 @@ async submitInterviewFeedback(
 ): Promise<{
   question: any;
   totalQuestions: number;
+  savedAnswer: string;
+  savedScore: number | null;
+  savedFeedback: string;
+  savedStrengths: string[];
+  savedImprovements: string[];
 }> {
   const response = await fetch(
     `${DJANGO_API}/interviews/start/`,
@@ -546,6 +551,11 @@ async submitInterviewFeedback(
     current_question: string;
     question_number: number;
     total_questions: number;
+    saved_answer: string;
+    saved_score: number | null;
+    saved_feedback: string;
+    saved_strengths: string[];
+    saved_improvements: string[];
   }>(
     response,
     "Failed to load interview question."
@@ -563,15 +573,31 @@ async submitInterviewFeedback(
 
     totalQuestions:
       data.total_questions,
+
+    savedAnswer:
+      data.saved_answer || "",
+
+    savedScore:
+      data.saved_score ?? null,
+
+    savedFeedback:
+      data.saved_feedback || "",
+
+    savedStrengths:
+      data.saved_strengths || [],
+
+    savedImprovements:
+      data.saved_improvements || [],
   };
 },
 
   async evaluateAnswer(data: {
-  sessionId: string;
-  questionId: string;
-  userAnswer: string;
-  timeSpentSeconds?: number;
-}): Promise<{
+    sessionId: string;
+    questionId: string;
+    userAnswer: string;
+    timeSpentSeconds?: number;
+    evaluate?: boolean;
+  }): Promise<{
   evaluation: any;
   question: any;
   interviewCompleted: boolean;
@@ -596,6 +622,10 @@ async submitInterviewFeedback(
           questionNumber,
         answer:
           data.userAnswer,
+        evaluate:
+          data.evaluate ?? true,
+        time_spent_seconds:
+          data.timeSpentSeconds ?? 0,
       }),
     }
   );

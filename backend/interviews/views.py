@@ -12,6 +12,7 @@ from .serializers import GenerateInterviewSerializer
 from .ai_generator import (
     generate_questions,
     evaluate_answer,
+    evaluate_answers_batch,
     generate_final_report,
 )
 
@@ -110,12 +111,22 @@ def start_interview(request):
 
     question = session.questions[question_number - 1]
 
+    saved_answer = InterviewAnswer.objects.filter(
+        session=session,
+        question_number=question_number,
+    ).first()
+
     return Response(
         {
             "session_id": session.id,
             "current_question": question,
             "question_number": question_number,
             "total_questions": len(session.questions),
+            "saved_answer": (saved_answer.answer if saved_answer else ""),
+            "saved_score": (saved_answer.score if saved_answer else None),
+            "saved_feedback": (saved_answer.feedback if saved_answer else ""),
+            "saved_strengths": (saved_answer.strengths if saved_answer else []),
+            "saved_improvements": (saved_answer.improvements if saved_answer else []),
         }
     )
 
@@ -126,6 +137,18 @@ def submit_answer(request):
     session_id = request.data.get("session_id")
     question_number = request.data.get("question_number")
     answer = request.data.get("answer")
+
+    should_evaluate = request.data.get("evaluate", True)
+
+    time_spent_seconds = int(
+        request.data.get(
+            "time_spent_seconds",
+            0,
+        )
+    )
+
+    if isinstance(should_evaluate, str):
+        should_evaluate = should_evaluate.lower() == "true"
 
     if not session_id or not question_number or not answer:
         return Response(
@@ -154,12 +177,24 @@ def submit_answer(request):
                 "Review this topic and try answering a similar question in your next practice session."
             ],
         }
-    else:
+
+    elif should_evaluate:
         evaluation = evaluate_answer(
             question,
             answer,
             session.difficulty,
         )
+
+    else:
+        evaluation = {
+            "score": 0,
+            "feedback": (
+                "Answer saved successfully. "
+                "It will be evaluated when the interview is completed."
+            ),
+            "strengths": [],
+            "improvements": [],
+        }
 
     interview_answer, created = InterviewAnswer.objects.update_or_create(
         session=session,
@@ -169,6 +204,15 @@ def submit_answer(request):
             "answer": answer,
             "score": evaluation.get("score", 0),
             "feedback": evaluation.get("feedback", ""),
+            "strengths": evaluation.get(
+                "strengths",
+                [],
+            ),
+            "improvements": evaluation.get(
+                "improvements",
+                [],
+            ),
+            "time_spent_seconds": time_spent_seconds,
         },
     )
 
@@ -195,15 +239,72 @@ def submit_answer(request):
 
     answers = session.answers.all().order_by("question_number")
 
+    pending_answers = []
+
+    for item in answers:
+        if item.answer != "[SKIPPED]" and item.feedback.startswith(
+            "Answer saved successfully."
+        ):
+            pending_answers.append(
+                {
+                    "question_number": item.question_number,
+                    "question": item.question,
+                    "answer": item.answer,
+                }
+            )
+
+    if pending_answers:
+        batch_results = evaluate_answers_batch(
+            pending_answers,
+            session.difficulty,
+        )
+
+        result_map = {
+            int(result.get("question_number")): result
+            for result in batch_results
+            if result.get("question_number") is not None
+        }
+
+        for item in answers:
+            result = result_map.get(item.question_number)
+
+            if not result:
+                continue
+
+            item.score = result.get(
+                "score",
+                0,
+            )
+
+            item.feedback = result.get(
+                "feedback",
+                "",
+            )
+
+            item.strengths = result.get(
+                "strengths",
+                [],
+            )
+
+            item.improvements = result.get(
+                "improvements",
+                [],
+            )
+
+            item.save()
+
     questions_and_answers = []
 
     for item in answers:
         questions_and_answers.append(
             {
+                "question_number": item.question_number,
                 "question": item.question,
                 "answer": item.answer,
                 "score": item.score,
                 "feedback": item.feedback,
+                "strengths": item.strengths,
+                "improvements": item.improvements,
             }
         )
 

@@ -212,14 +212,30 @@ Scoring Rules:
 - Do not add markdown.
 """
 
+    answer_text = str(answer or "").strip()
+    word_count = len(answer_text.split())
+
+    if word_count >= 80:
+        fallback_score = 70
+    elif word_count >= 40:
+        fallback_score = 60
+    elif word_count >= 15:
+        fallback_score = 50
+    else:
+        fallback_score = 35
+
     fallback_evaluation = {
-        "score": 70,
+        "score": fallback_score,
         "feedback": (
-            "Your answer was recorded successfully. "
-            "AI evaluation is temporarily unavailable."
+            "AI evaluation could not be completed right now. "
+            "A provisional score was generated based on the "
+            "completeness of your submitted answer."
         ),
-        "strengths": ["Answer submitted successfully."],
-        "improvements": ["Review the answer and continue practicing."],
+        "strengths": ["You attempted the question and submitted an answer."],
+        "improvements": [
+            "Review the topic and strengthen your answer with "
+            "clear technical details, reasoning, and examples."
+        ],
     }
 
     try:
@@ -242,6 +258,113 @@ Scoring Rules:
         )
 
         return fallback_evaluation
+
+
+def evaluate_answers_batch(
+    answers,
+    difficulty,
+):
+    if not answers:
+        return []
+
+    prompt = f"""
+You are an expert technical interviewer.
+
+Difficulty:
+{difficulty}
+
+Candidate interview responses:
+
+{answers}
+
+Evaluate every response.
+
+Return ONLY valid JSON as a list using this exact structure:
+
+[
+  {{
+    "question_number": 1,
+    "score": 0,
+    "feedback": "",
+    "strengths": [],
+    "improvements": []
+  }}
+]
+
+Rules:
+
+- Return one result for every supplied answer.
+- Keep the original question_number.
+- Score must be between 0 and 100.
+- Judge correctness, relevance, clarity and completeness.
+- 90-100 = excellent.
+- 75-89 = good.
+- 60-74 = acceptable but incomplete.
+- 40-59 = weak.
+- 0-39 = incorrect or very poor.
+- Keep feedback concise.
+- Do not return markdown.
+- Return JSON only.
+"""
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+        )
+
+        result = json.loads(response.text.strip())
+
+        if not isinstance(result, list):
+            raise ValueError("Gemini did not return a list")
+
+        return result
+
+    except Exception as error:
+        print(
+            "BATCH EVALUATION GEMINI ERROR:",
+            repr(error),
+        )
+
+        fallback_results = []
+
+        for item in answers:
+            answer_text = str(item.get("answer", "")).strip()
+
+            # Local provisional fallback.
+            # Avoid a fake fixed score such as 70 for every answer.
+            word_count = len(answer_text.split())
+
+            if word_count >= 80:
+                score = 70
+            elif word_count >= 40:
+                score = 60
+            elif word_count >= 15:
+                score = 50
+            else:
+                score = 35
+
+            fallback_results.append(
+                {
+                    "question_number": item.get("question_number"),
+                    "score": score,
+                    "feedback": (
+                        "A provisional evaluation was generated "
+                        "from the completeness of your submitted answer. "
+                        "Review the feedback and continue improving "
+                        "the technical depth of your response."
+                    ),
+                    "strengths": [
+                        "You attempted the question and provided a response."
+                    ],
+                    "improvements": [
+                        "Strengthen the answer with accurate technical "
+                        "details, clear reasoning, and relevant examples."
+                    ],
+                }
+            )
+
+        return fallback_results
 
 
 def generate_final_report(questions_and_answers):
