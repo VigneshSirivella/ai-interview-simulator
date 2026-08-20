@@ -574,8 +574,10 @@ export const ResultPage: React.FC = () => {
                       Your Answer:
                     </span>
 
-                    {question.userAnswer ||
-                      "No answer provided"}
+                    {question.userAnswer === "[SKIPPED]"
+                      ? "Skipped — No answer provided"
+                      : question.userAnswer ||
+                        "No answer provided"}
                   </div>
 
                   {question.evaluation && (

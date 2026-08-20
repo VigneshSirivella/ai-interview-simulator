@@ -75,6 +75,11 @@ export const InterviewScreenPage: React.FC = () => {
   const [evaluation, setEvaluation] =
     useState<any | null>(null);
 
+  const [
+    nextQuestionCountdown,
+    setNextQuestionCountdown,
+  ] = useState(10);
+
   const [showHint, setShowHint] =
     useState(false);
 
@@ -138,27 +143,27 @@ export const InterviewScreenPage: React.FC = () => {
     currentQuestionIndex >=
     totalQuestions - 1;
 
-  /*
-   * Interview duration:
-   * 3 questions = 30 minutes
-   * 4-5 questions = 45 minutes
-   * 6-10 questions = 60 minutes
-   */
-  const interviewMinutes =
-    totalQuestions <= 3
-      ? 30
-      : totalQuestions <= 5
-      ? 45
-      : 60;
+    /*
+    * Interview duration:
+    * 3 questions = 7 minutes
+    * 4-5 questions = 10 minutes
+    * 6-10 questions = 2 minutes per question
+    */
+    const interviewMinutes =
+      totalQuestions <= 3
+        ? 7
+        : totalQuestions <= 5
+        ? 10
+        : totalQuestions * 2;
 
-  const totalInterviewSeconds =
-    interviewMinutes * 60;
+    const totalInterviewSeconds =
+      interviewMinutes * 60;
 
-  const remainingSeconds = Math.max(
-    totalInterviewSeconds -
-      interviewElapsed,
-    0
-  );
+    const remainingSeconds = Math.max(
+      totalInterviewSeconds -
+        interviewElapsed,
+      0
+    );
 
   /*
    * Read setup options.
@@ -214,17 +219,143 @@ export const InterviewScreenPage: React.FC = () => {
   /*
    * Whole interview timer.
    */
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setInterviewElapsed(
-        (current) => current + 1
+   useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
+
+    const timerKey =
+      `interview-end-time-${sessionId}`;
+
+    // Read the actual question count saved during setup.
+    let effectiveTotalQuestions =
+      totalQuestions;
+
+    const savedOptions =
+      sessionStorage.getItem(
+        `interview-options-${sessionId}`
       );
-    }, 1000);
+
+    if (savedOptions) {
+      try {
+        const parsed =
+          JSON.parse(savedOptions);
+
+        const savedTotal = Number(
+          parsed.totalQuestions
+        );
+
+        if (
+          Number.isFinite(savedTotal) &&
+          savedTotal > 0
+        ) {
+          effectiveTotalQuestions =
+            savedTotal;
+        }
+      } catch {
+        // Use current totalQuestions
+      }
+    }
+
+    const durationMinutes =
+      effectiveTotalQuestions <= 3
+        ? 7
+        : effectiveTotalQuestions <= 5
+        ? 10
+        : effectiveTotalQuestions * 2;
+
+    const durationSeconds =
+      durationMinutes * 60;
+
+    let endTime = Number(
+      localStorage.getItem(timerKey)
+    );
+
+    if (!endTime) {
+      endTime =
+        Date.now() +
+        durationSeconds * 1000;
+
+      localStorage.setItem(
+        timerKey,
+        String(endTime)
+      );
+    }
+
+    let expiryHandled = false;
+
+    const updateTimer = async () => {
+      const secondsLeft = Math.max(
+        Math.ceil(
+          (endTime - Date.now()) / 1000
+        ),
+        0
+      );
+
+      setInterviewElapsed(
+        Math.max(
+          durationSeconds -
+            secondsLeft,
+          0
+        )
+      );
+
+      if (
+        secondsLeft === 0 &&
+        !expiryHandled
+      ) {
+        expiryHandled = true;
+
+        try {
+          await apiService.endInterview(
+            sessionId,
+            "Time expired",
+            "Interview automatically ended because the allotted time expired."
+          );
+
+          sessionStorage.removeItem(
+            `interview-options-${sessionId}`
+          );
+
+          localStorage.removeItem(
+            timerKey
+          );
+
+          navigate("/dashboard");
+        } catch (requestError) {
+          console.error(
+            "Timer expiry error:",
+            requestError
+          );
+
+          setError(
+            getApiError(
+              requestError,
+              "Unable to end interview after time expired."
+            )
+          );
+
+          expiryHandled = false;
+        }
+      }
+    };
+
+    updateTimer();
+
+    const timer =
+      window.setInterval(
+        updateTimer,
+        1000
+      );
 
     return () => {
       window.clearInterval(timer);
     };
-  }, []);
+  }, [
+    sessionId,
+    totalQuestions,
+    navigate,
+  ]);
 
   /*
    * Time spent on current question.
@@ -459,6 +590,7 @@ export const InterviewScreenPage: React.FC = () => {
         setEvaluation(
           response.evaluation
         );
+        setNextQuestionCountdown(10);
         if (response.interviewCompleted) {
           sessionStorage.removeItem(
             `interview-options-${sessionId}`
@@ -484,6 +616,70 @@ export const InterviewScreenPage: React.FC = () => {
       }
     };
 
+
+  const handleSkipQuestion = async () => {
+    if (
+      !sessionId ||
+      !currentQuestion ||
+      isEvaluating
+    ) {
+      return;
+    }
+
+    setIsEvaluating(true);
+    setError("");
+
+    try {
+      const response =
+        await apiService.evaluateAnswer({
+          sessionId,
+          questionId:
+            currentQuestion.id,
+          userAnswer: "[SKIPPED]",
+          timeSpentSeconds:
+            secondsElapsed,
+        });
+
+      if (response.interviewCompleted) {
+        sessionStorage.removeItem(
+          `interview-options-${sessionId}`
+        );
+
+        localStorage.removeItem(
+          `interview-end-time-${sessionId}`
+        );
+
+        navigate(`/result/${sessionId}`);
+        return;
+      }
+
+      setEvaluation(null);
+      setUserAnswer("");
+      setCodeAnswer("");
+      setSelectedOption("");
+      setSecondsElapsed(0);
+
+      setCurrentQuestionIndex(
+        (current) => current + 1
+      );
+    } catch (requestError) {
+      console.error(
+        "Skip question error:",
+        requestError
+      );
+
+      setError(
+        getApiError(
+          requestError,
+          "Unable to skip this question."
+        )
+      );
+    } finally {
+      setIsEvaluating(false);
+    }
+  };
+
+
   const handleNext = () => {
     if (!isLastQuestion) {
       setCurrentQuestionIndex(
@@ -496,6 +692,37 @@ export const InterviewScreenPage: React.FC = () => {
 
     handleFinishSession();
   };
+
+  useEffect(() => {
+    if (
+      !evaluation ||
+      isLastQuestion
+    ) {
+      return;
+    }
+
+    if (
+      nextQuestionCountdown <= 0
+    ) {
+      handleNext();
+      return;
+    }
+
+    const timer =
+      window.setTimeout(() => {
+        setNextQuestionCountdown(
+          (current) => current - 1
+        );
+      }, 1000);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [
+    evaluation,
+    nextQuestionCountdown,
+    isLastQuestion,
+  ]);
 
   const handlePrevious = () => {
     if (
@@ -544,6 +771,10 @@ export const InterviewScreenPage: React.FC = () => {
           `interview-options-${sessionId}`
         );
 
+        localStorage.removeItem(
+          `interview-end-time-${sessionId}`
+        );
+
       navigate(
           `/result/${response.report.id}`
       );
@@ -590,6 +821,10 @@ export const InterviewScreenPage: React.FC = () => {
 
         sessionStorage.removeItem(
           `interview-options-${sessionId}`
+        );
+
+        localStorage.removeItem(
+          `interview-end-time-${sessionId}`
         );
 
         navigate("/dashboard");
@@ -1009,15 +1244,12 @@ export const InterviewScreenPage: React.FC = () => {
               )}
 
               <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
-
+                
               <button
                 type="button"
-                onClick={
-                  handlePrevious
-                }
+                onClick={handlePrevious}
                 disabled={
-                  currentQuestionIndex ===
-                  0
+                  currentQuestionIndex === 0
                 }
                 className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 disabled:opacity-40"
               >
@@ -1025,26 +1257,38 @@ export const InterviewScreenPage: React.FC = () => {
                 Previous
               </button>
 
-              <button
-                type="button"
-                onClick={
-                  handleSubmitAnswer
-                }
-                disabled={
-                  !answerAvailable ||
-                  isEvaluating ||
-                  Boolean(
-                    evaluation
-                  )
-                }
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 disabled:opacity-40"
-              >
-                <Send className="inline w-4 h-4 mr-2" />
+              <div className="flex flex-col sm:flex-row gap-3">
 
-                {isEvaluating
-                  ? "Evaluating..."
-                  : "Submit and Evaluate"}
-              </button>
+                <button
+                  type="button"
+                  onClick={handleSkipQuestion}
+                  disabled={
+                    isEvaluating ||
+                    Boolean(evaluation)
+                  }
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-600 text-white disabled:opacity-40"
+                >
+                  Skip Question
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSubmitAnswer}
+                  disabled={
+                    !answerAvailable ||
+                    isEvaluating ||
+                    Boolean(evaluation)
+                  }
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 disabled:opacity-40"
+                >
+                  <Send className="inline w-4 h-4 mr-2" />
+
+                  {isEvaluating
+                    ? "Evaluating..."
+                    : "Submit and Evaluate"}
+                </button>
+
+              </div>
 
             </div>
           </div>
@@ -1080,13 +1324,20 @@ export const InterviewScreenPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex justify-end">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+                {!isLastQuestion && (
+                  <p className="text-xs text-slate-400">
+                    Moving to next question in{" "}
+                    <span className="font-bold text-indigo-400">
+                      {nextQuestionCountdown}s
+                    </span>
+                  </p>
+                )}
 
                 <button
                   type="button"
-                  onClick={
-                    handleNext
-                  }
+                  onClick={handleNext}
                   className="px-6 py-3 rounded-xl bg-emerald-600"
                 >
                   {isLastQuestion

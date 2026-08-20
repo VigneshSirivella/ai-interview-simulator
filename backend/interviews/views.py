@@ -133,11 +133,24 @@ def submit_answer(request):
     except (IndexError, ValueError, TypeError):
         return Response({"error": "Invalid question number"}, status=400)
 
-    evaluation = evaluate_answer(
-        question,
-        answer,
-        session.difficulty,
-    )
+    if answer == "[SKIPPED]":
+        evaluation = {
+            "score": 0,
+            "feedback": (
+                "You skipped this question. Attempting it could "
+                "have improved your overall interview score."
+            ),
+            "strengths": [],
+            "improvements": [
+                "Review this topic and try answering a similar question in your next practice session."
+            ],
+        }
+    else:
+        evaluation = evaluate_answer(
+            question,
+            answer,
+            session.difficulty,
+        )
 
     interview_answer, created = InterviewAnswer.objects.update_or_create(
         session=session,
