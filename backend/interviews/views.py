@@ -93,6 +93,15 @@ def start_interview(request):
             status=404,
         )
 
+    if session.status in ["completed", "ended"]:
+        return Response(
+            {
+                "error": "Interview session is already finished",
+                "session_status": session.status,
+            },
+            status=409,
+        )
+
     if question_number < 1 or question_number > len(session.questions):
         return Response(
             {"error": "Invalid question number"},

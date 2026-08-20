@@ -442,19 +442,40 @@ export const InterviewScreenPage: React.FC = () => {
           );
         }
       } catch (requestError) {
-        console.error(
-          "Error loading question:",
-          requestError
+      console.error(
+        "Error loading question:",
+        requestError
+      );
+
+      const errorMessage =
+        getApiError(
+          requestError,
+          "Unable to load interview question."
         );
 
-        setCurrentQuestion(null);
-
-        setError(
-          getApiError(
-            requestError,
-            "Unable to load interview question."
-          )
+      if (
+        errorMessage
+          .toLowerCase()
+          .includes("already finished")
+      ) {
+        sessionStorage.removeItem(
+          `interview-options-${sessionId}`
         );
+
+        localStorage.removeItem(
+          `interview-end-time-${sessionId}`
+        );
+
+        navigate(
+          "/dashboard",
+          { replace: true }
+        );
+
+        return;
+      }
+
+      setCurrentQuestion(null);
+      setError(errorMessage);
       } finally {
         setIsGeneratingQuestion(false);
       }
@@ -594,6 +615,10 @@ export const InterviewScreenPage: React.FC = () => {
         if (response.interviewCompleted) {
           sessionStorage.removeItem(
             `interview-options-${sessionId}`
+          );
+
+          localStorage.removeItem(
+            `interview-end-time-${sessionId}`
           );
 
           navigate(`/result/${sessionId}`);
@@ -1244,7 +1269,7 @@ export const InterviewScreenPage: React.FC = () => {
               )}
 
               <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
-                
+
               <button
                 type="button"
                 onClick={handlePrevious}
