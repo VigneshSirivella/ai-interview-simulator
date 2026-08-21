@@ -1634,6 +1634,7 @@ def get_practice_attempt(request, question_id):
                 "strengths": attempt.strengths,
                 "improvements": attempt.improvements,
                 "updatedAt": attempt.updated_at,
+                "questionData": attempt.question_data,
             }
         }
     )

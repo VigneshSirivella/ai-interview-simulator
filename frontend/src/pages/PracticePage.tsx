@@ -267,29 +267,58 @@ export const PracticePage: React.FC = () => {
 
         setSolvedAttempts(solvedMap);
 
-        setQuestions(res.questions);
+      setQuestions(res.questions);
 
-        if (res.questions.length > 0) {
-          let questionToOpen =
-            res.questions[0];
+      let questionToOpen: PracticeQuestion | null =
+        res.questions.length > 0
+          ? res.questions[0]
+          : null;
 
-          if (questionFromUrl) {
-            const matchedQuestion =
-              res.questions.find(
-                (q) =>
-                  q.id ===
-                  questionFromUrl
-              );
-              
-            if (matchedQuestion) {
-              questionToOpen =
-                matchedQuestion;
-            }
-          }
-          await handleSelectQuestion(
-            questionToOpen
+      if (questionFromUrl) {
+        const matchedQuestion =
+          res.questions.find(
+            (q) => q.id === questionFromUrl
           );
+
+        if (matchedQuestion) {
+          questionToOpen = matchedQuestion;
+        } else {
+          const savedAttempt =
+            await apiService.getPracticeAttempt(
+              questionFromUrl
+            );
+
+          if (
+            savedAttempt.attempt &&
+            savedAttempt.attempt.questionData
+          ) {
+            questionToOpen = {
+              ...savedAttempt.attempt.questionData,
+              id: questionFromUrl,
+              title:
+                savedAttempt.attempt.questionTitle,
+              type:
+                savedAttempt.attempt.questionType,
+              topicOrLanguage:
+                savedAttempt.attempt.topicOrLanguage,
+              difficulty:
+                savedAttempt.attempt.difficulty,
+            } as PracticeQuestion;
+
+            setQuestions((current) => [
+              questionToOpen as PracticeQuestion,
+              ...current,
+            ]);
+          }
         }
+      }
+
+      if (questionToOpen) {
+        await handleSelectQuestion(
+          questionToOpen
+        );
+      }        
+
       } catch (err) {
         console.error(
           "Error loading practice questions:",
