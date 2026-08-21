@@ -369,7 +369,7 @@ def submit_answer(request):
     )
 
 
-@api_view(["GET"])
+@api_view(["GET", "DELETE"])
 @permission_classes([IsAuthenticated])
 def final_report(request, session_id):
     try:
@@ -381,6 +381,14 @@ def final_report(request, session_id):
         return Response(
             {"error": "Interview session not found"},
             status=404,
+        )
+
+    if request.method == "DELETE":
+        session.delete()
+
+        return Response(
+            {"message": "Interview deleted successfully"},
+            status=200,
         )
 
     # Only completed interviews should have a final report

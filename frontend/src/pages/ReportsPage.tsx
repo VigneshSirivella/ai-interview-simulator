@@ -35,9 +35,32 @@ export const ReportsPage: React.FC = () => {
   }, [search]);
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this report?")) {
+    const confirmed = window.confirm(
+      "Delete this interview permanently?\n\n" +
+      "This interview will be removed from Reports and Dashboard statistics. " +
+      "Your leaderboard score and rank may also change.\n\n" +
+      "This action cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
       await apiService.deleteReport(id);
-      setReports((prev) => prev.filter((r) => r.id !== id));
+
+      setReports((prev) =>
+        prev.filter((report) => report.id !== id)
+      );
+    } catch (error) {
+      console.error(
+        "Failed to delete interview:",
+        error
+      );
+
+      window.alert(
+        "Unable to delete this interview. Please try again."
+      );
     }
   };
 
