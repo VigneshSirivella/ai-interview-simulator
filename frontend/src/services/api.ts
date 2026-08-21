@@ -11,7 +11,7 @@ import {
 } from "../types";
 
 const DJANGO_API =
-  "https://ai-interview-simulator-1-o4br.onrender.com/api";
+  "https://ai-interview-simulator-docker.onrender.com/api";
 
 console.log("DJANGO_API =", DJANGO_API);
 
