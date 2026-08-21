@@ -388,6 +388,13 @@ export const AuthProvider: React.FC<{
         formData.append("phone", updatedData.phone);
       }
 
+      if (updatedData.preferredLanguage !== undefined) {
+        formData.append(
+          "preferred_language",
+          updatedData.preferredLanguage
+        );
+      }
+
       if (updatedData.githubUrl !== undefined) {
         formData.append("github", updatedData.githubUrl);
       }
@@ -411,6 +418,8 @@ export const AuthProvider: React.FC<{
         name: profile.full_name,
         email: profile.email,
         phone: profile.phone || "",
+        preferredLanguage:
+          profile.preferred_language || "Python",
         profilePicture:
           profile.profile_picture || undefined,
         githubUrl: profile.github || "",

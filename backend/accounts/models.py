@@ -21,6 +21,11 @@ class User(AbstractUser):
     github = models.URLField(blank=True)
 
     linkedin = models.URLField(blank=True)
+    preferred_language = models.CharField(
+        max_length=50,
+        blank=True,
+        default="Python",
+    )
 
     profile_picture = models.ImageField(
         upload_to="profiles/",

@@ -42,6 +42,7 @@ export interface User {
   bio?: string;
   targetRole?: string;
   targetCompany?: string;
+  preferredLanguage?: string;
   token?: string;
 }
 

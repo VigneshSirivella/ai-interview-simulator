@@ -49,6 +49,11 @@ def profile(request):
             user.linkedin,
         )
 
+        user.preferred_language = request.data.get(
+            "preferred_language",
+            user.preferred_language,
+        )
+
         if "profile_picture" in request.FILES:
             user.profile_picture = request.FILES["profile_picture"]
 
@@ -75,6 +80,7 @@ def profile(request):
             "graduation_year": user.graduation_year,
             "github": user.github,
             "linkedin": user.linkedin,
+            "preferred_language": user.preferred_language,
             "profile_picture": profile_picture,
         }
     )

@@ -146,6 +146,7 @@ export interface ProfileResponse {
   github?: string;
   linkedin?: string;
   profile_picture?: string;
+  preferred_language?: string;
 }
 
 
