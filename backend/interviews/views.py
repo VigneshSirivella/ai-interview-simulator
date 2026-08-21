@@ -29,7 +29,9 @@ def generate_interview(request):
 
         try:
             resume = Resume.objects.get(user=request.user)
-            resume_text = resume.extracted_text
+
+            resume_text = (resume.extracted_text or "")[:8000]
+
         except Resume.DoesNotExist:
             resume_text = ""
 

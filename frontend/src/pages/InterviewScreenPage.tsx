@@ -72,6 +72,18 @@ export const InterviewScreenPage: React.FC = () => {
     setIsCurrentAnswerSaved,
   ] = useState(false);
 
+  const [draftAnswers, setDraftAnswers] =
+    useState<Record<number, {
+      userAnswer: string;
+      codeAnswer: string;
+      selectedOption: string;
+    }>>({});
+
+  const [
+    answeredQuestionIndexes,
+    setAnsweredQuestionIndexes,
+  ] = useState<Set<number>>(new Set());
+
   const [
     isGeneratingQuestion,
     setIsGeneratingQuestion,
@@ -125,6 +137,21 @@ export const InterviewScreenPage: React.FC = () => {
     showEndDialog,
     setShowEndDialog,
   ] = useState(false);
+
+  const [
+    showUnansweredDialog,
+    setShowUnansweredDialog,
+  ] = useState(false);
+
+  const [
+    unansweredQuestions,
+    setUnansweredQuestions,
+  ] = useState<number[]>([]);
+
+  const [
+    pendingFinalAction,
+    setPendingFinalAction,
+  ] = useState<"submit" | "evaluate" | null>(null);
 
   const [endReason, setEndReason] =
     useState("");
@@ -448,7 +475,35 @@ export const InterviewScreenPage: React.FC = () => {
           Boolean(response.savedAnswer)
         );
 
-          if (savedAnswer === "[SKIPPED]") {
+        const currentDraft =
+          draftAnswers[currentQuestionIndex];
+
+        if (
+          response.savedAnswer &&
+          response.savedAnswer !== "[SKIPPED]"
+        ) {
+          setAnsweredQuestionIndexes(
+            (current) => {
+              const updated = new Set(current);
+              updated.add(currentQuestionIndex);
+              return updated;
+            }
+          );
+        }
+
+        if (!savedAnswer && currentDraft) {
+          setUserAnswer(
+            currentDraft.userAnswer || ""
+          );
+
+          setCodeAnswer(
+            currentDraft.codeAnswer || ""
+          );
+
+          setSelectedOption(
+            currentDraft.selectedOption || ""
+          );
+        } else if (savedAnswer === "[SKIPPED]") {
             setUserAnswer("");
             setSelectedOption("");
             setCodeAnswer("");
@@ -636,8 +691,32 @@ export const InterviewScreenPage: React.FC = () => {
     return textAnswer;
   };
 
+  const getUnansweredQuestions = () => {
+    const answered =
+      new Set(answeredQuestionIndexes);
+
+    if (getFinalAnswer()) {
+      answered.add(currentQuestionIndex);
+    }
+
+    const unanswered: number[] = [];
+
+    for (
+      let index = 0;
+      index < totalQuestions;
+      index++
+    ) {
+      if (!answered.has(index)) {
+        unanswered.push(index + 1);
+      }
+    }
+
+    return unanswered;
+  };
+
+
   const handleSubmitAnswer =
-    async () => {
+    async (skipUnansweredCheck = false) => {
       if (
         !sessionId ||
         !currentQuestion ||
@@ -659,6 +738,18 @@ export const InterviewScreenPage: React.FC = () => {
         return;
       }
 
+      if (isLastQuestion && !skipUnansweredCheck) {
+        const unanswered =
+          getUnansweredQuestions();
+
+        if (unanswered.length > 0) {
+          setUnansweredQuestions(unanswered);
+          setPendingFinalAction("submit");
+          setShowUnansweredDialog(true);
+          return;
+        }
+      }
+
       setIsSubmitting(true);
       setError("");
 
@@ -674,6 +765,16 @@ export const InterviewScreenPage: React.FC = () => {
               secondsElapsed,
             evaluate: false,
           });
+
+        setIsCurrentAnswerSaved(true);
+
+        setAnsweredQuestionIndexes(
+          (current) => {
+            const updated = new Set(current);
+            updated.add(currentQuestionIndex);
+            return updated;
+          }
+        );
 
         if (response.interviewCompleted) {
           sessionStorage.removeItem(
@@ -715,7 +816,7 @@ export const InterviewScreenPage: React.FC = () => {
     };
 
   const handleEvaluateAnswer =
-    async () => {
+    async (skipUnansweredCheck = false) => {
       if (
         !sessionId ||
         !currentQuestion ||
@@ -736,6 +837,18 @@ export const InterviewScreenPage: React.FC = () => {
 
         return;
       }
+
+     if (isLastQuestion && !skipUnansweredCheck) {
+      const unanswered =
+        getUnansweredQuestions();
+
+      if (unanswered.length > 0) {
+        setUnansweredQuestions(unanswered);
+        setPendingFinalAction("evaluate");
+        setShowUnansweredDialog(true);
+        return;
+      }
+    }
 
       const evaluationPauseKey =
         `interview-evaluation-pause-${sessionId}`;
@@ -766,6 +879,14 @@ export const InterviewScreenPage: React.FC = () => {
         );
 
         setIsCurrentAnswerSaved(true);
+
+        setAnsweredQuestionIndexes(
+          (current) => {
+            const updated = new Set(current);
+            updated.add(currentQuestionIndex);
+            return updated;
+          }
+        );
 
         setNextQuestionCountdown(10);
 
@@ -899,31 +1020,59 @@ export const InterviewScreenPage: React.FC = () => {
     }
   };
 
+  const saveCurrentDraft = () => {
+    setDraftAnswers((current) => ({
+      ...current,
+      [currentQuestionIndex]: {
+        userAnswer,
+        codeAnswer,
+        selectedOption,
+      },
+    }));
+  };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (
-      answerAvailable &&
-      !isCurrentAnswerSaved
+      !sessionId ||
+      !currentQuestion
     ) {
-      setError(
-        "You have an unsaved answer. Submit it before moving to the next question."
-      );
       return;
     }
 
-    if (
-      !answerAvailable &&
-      !isCurrentAnswerSaved
-    ) {
-      setError(
-        "Submit an answer or use Skip before moving to the next question."
-      );
-      return;
-    }
-
+    saveCurrentDraft();
     setError("");
 
+    const finalAnswer =
+      getFinalAnswer();
+
+    // If blank, store it as unanswered/skipped
+    if (!finalAnswer && !isCurrentAnswerSaved) {
+      try {
+        await apiService.evaluateAnswer({
+          sessionId,
+          questionId:
+            currentQuestion.id,
+          userAnswer:
+            "[SKIPPED]",
+          timeSpentSeconds:
+            secondsElapsed,
+          evaluate: false,
+        });
+      } catch (requestError) {
+        console.error(
+          "Unable to save unanswered question:",
+          requestError
+        );
+      }
+    }
+
     if (!isLastQuestion) {
+      setEvaluation(null);
+      setUserAnswer("");
+      setCodeAnswer("");
+      setSelectedOption("");
+      setSecondsElapsed(0);
+
       setCurrentQuestionIndex(
         (current) => current + 1
       );
@@ -972,16 +1121,8 @@ export const InterviewScreenPage: React.FC = () => {
       return;
     }
 
-    if (
-      answerAvailable &&
-      !isCurrentAnswerSaved
-    ) {
-      setError(
-        "You have an unsaved answer. Submit it before moving to the previous question."
-      );
-      return;
-    }
-
+    saveCurrentDraft();
+    
     setError("");
 
     setCurrentQuestionIndex(
@@ -1534,27 +1675,14 @@ export const InterviewScreenPage: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={handleSkipQuestion}
-                  disabled={
-                    isSubmitting ||
-                    isEvaluating ||
-                    Boolean(evaluation)
-                  }
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-amber-600 text-white text-sm font-semibold disabled:opacity-40"
-                >
-                  Skip
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleEvaluateAnswer}
+                  onClick={() => handleEvaluateAnswer()}
                   disabled={
                     !answerAvailable ||
                     isSubmitting ||
                     isEvaluating ||
                     Boolean(evaluation)
                   }
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold disabled:opacity-40"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold disabled:opacity-40"
                 >
                   {isEvaluating
                     ? "Evaluating..."
@@ -1563,7 +1691,7 @@ export const InterviewScreenPage: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={handleSubmitAnswer}
+                  onClick={() => handleSubmitAnswer()}
                   disabled={
                     !answerAvailable ||
                     isSubmitting ||
@@ -1647,6 +1775,73 @@ export const InterviewScreenPage: React.FC = () => {
       </main>
 
       {/* END INTERVIEW DIALOG */}
+        
+      {/* UNANSWERED QUESTIONS DIALOG */}
+      {showUnansweredDialog && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#15151A] border border-slate-700 rounded-3xl p-6 shadow-2xl">
+
+            <h3 className="text-xl font-bold text-white">
+              Unanswered Questions
+            </h3>
+
+            <p className="text-sm text-slate-400 mt-3">
+              You have not answered{" "}
+              {unansweredQuestions
+                .map((number) => `Question ${number}`)
+                .join(", ")}.
+            </p>
+
+            <p className="text-sm text-slate-400 mt-2">
+              Do you want to go back and answer them, or continue without answering?
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUnansweredDialog(false);
+                  setPendingFinalAction(null);
+
+                  setIsEvaluating(false);
+                  setIsSubmitting(false);
+                  setEvaluation(null);
+                  setError("");
+
+                  if (unansweredQuestions.length > 0) {
+                    setCurrentQuestionIndex(
+                      unansweredQuestions[0] - 1
+                    );
+                  }
+                }}
+                className="flex-1 px-4 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold"
+              >
+                Go Back & Answer
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUnansweredDialog(false);
+
+                  if (pendingFinalAction === "submit") {
+                    handleSubmitAnswer(true);
+                  } else if (pendingFinalAction === "evaluate") {
+                    handleEvaluateAnswer(true);
+                  }
+
+                  setPendingFinalAction(null);
+                }}
+                className="flex-1 px-4 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold"
+              >
+                Continue Without Answering
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
       {showEndDialog && (
 
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
