@@ -160,6 +160,11 @@ export const AuthProvider: React.FC<{
         name: profile.full_name,
         email: profile.email,
 
+        phone: profile.phone || "",
+
+        preferredLanguage:
+          profile.preferred_language || "Python",
+
         targetRole:
           user?.targetRole ||
           "Software Engineer",
