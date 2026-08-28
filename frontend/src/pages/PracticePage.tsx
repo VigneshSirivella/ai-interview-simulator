@@ -28,6 +28,154 @@ import {
   Wand2,
 } from "lucide-react";
 
+// Singleton Web Audio API Synth Chime for practice page button hover/click sound
+let sharedAudioCtx: AudioContext | null = null;
+let lastChimeTime = 0;
+
+const playPracticeChime = (freq = 640) => {
+  const now = Date.now();
+  if (now - lastChimeTime < 100) return; // Throttle to max 10 chimes per second
+  lastChimeTime = now;
+
+  try {
+    if (!sharedAudioCtx) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      sharedAudioCtx = new AudioCtx();
+    }
+
+    if (sharedAudioCtx.state === "suspended") {
+      sharedAudioCtx.resume().catch(() => {});
+    }
+
+    const ctx = sharedAudioCtx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.25, ctx.currentTime + 0.12);
+
+    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.15);
+  } catch (e) {
+    // Ignore audio policies
+  }
+};
+
+interface InteractiveQuestionCardProps {
+  q: PracticeQuestion;
+  isSelected: boolean;
+  solvedScore?: number;
+  onSelect: () => void;
+}
+
+const InteractiveQuestionCard: React.FC<InteractiveQuestionCardProps> = ({
+  q,
+  isSelected,
+  solvedScore,
+  onSelect,
+}) => {
+  const getDifficultyBadge = (diff?: string) => {
+    if (diff === "Easy") return "text-emerald-300 bg-emerald-500/35 border-emerald-400/60 shadow-sm";
+    if (diff === "Medium") return "text-indigo-200 bg-indigo-500/35 border-indigo-400/60 shadow-sm";
+    return "text-rose-300 bg-rose-500/35 border-rose-400/60 shadow-sm";
+  };
+
+  const getGradientStyle = (diff?: string) => {
+    if (diff === "Easy") return "from-[#0F2D27] via-[#122422] to-[#0F111E] border-emerald-400/50 hover:border-emerald-300 shadow-emerald-950/60";
+    if (diff === "Medium") return "from-[#1D1B4B] via-[#161836] to-[#0F111E] border-indigo-400/50 hover:border-indigo-300 shadow-indigo-950/60";
+    return "from-[#36152B] via-[#241426] to-[#0F111E] border-rose-400/50 hover:border-rose-300 shadow-rose-950/60";
+  };
+
+  const getOverlayGradient = (diff?: string) => {
+    if (diff === "Easy") return "from-emerald-500/35 via-teal-500/20 to-transparent";
+    if (diff === "Medium") return "from-indigo-500/35 via-purple-500/20 to-transparent";
+    return "from-rose-500/35 via-pink-500/20 to-transparent";
+  };
+
+  return (
+    <div
+      onMouseEnter={() => {
+        playPracticeChime(q.difficulty === "Easy" ? 520 : q.difficulty === "Medium" ? 640 : 760);
+      }}
+      onClick={onSelect}
+      className={`relative overflow-hidden shrink-0 min-h-[115px] p-4 sm:p-4.5 rounded-2xl text-left border-2 transform hover:-translate-y-2 hover:scale-[1.025] transition-all duration-500 flex flex-col gap-2.5 cursor-pointer group shadow-xl bg-gradient-to-br ${getGradientStyle(
+        q.difficulty
+      )} ${
+        isSelected
+          ? "border-cyan-400 shadow-2xl shadow-indigo-500/40 ring-2 ring-cyan-400/50 bg-[#1e1b4b]"
+          : ""
+      }`}
+    >
+      {/* Top glowing light beam when box opens/moves forward */}
+      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20" />
+
+      {/* Light vibrant background color overlay that smoothly fades out on mouse hover */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-r ${getOverlayGradient(
+          q.difficulty
+        )} ${
+          isSelected
+            ? "opacity-100"
+            : "opacity-80 group-hover:opacity-20"
+        } transition-opacity duration-500 pointer-events-none`}
+      />
+
+      <div className="relative z-10 flex items-center justify-between gap-2 w-full">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="px-2.5 py-0.5 rounded-lg bg-indigo-500/35 text-indigo-200 text-xs font-black border border-indigo-400/50 shadow-sm">
+            {q.type}
+          </span>
+
+          {q.topicOrLanguage && (
+            <span className="px-2.5 py-0.5 rounded-lg bg-purple-500/35 text-purple-200 text-[11px] font-black border border-purple-400/50 shadow-sm">
+              {q.topicOrLanguage}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          {solvedScore !== undefined && (
+            <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/35 text-emerald-200 border border-emerald-400/60 text-xs font-black flex items-center gap-1 shadow-sm">
+              ✓ {Math.round(solvedScore)}%
+            </span>
+          )}
+
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-xs font-black border ${getDifficultyBadge(
+              q.difficulty
+            )}`}
+          >
+            {q.difficulty}
+          </span>
+        </div>
+      </div>
+
+      <div className="relative z-10 w-full mt-0.5">
+        <h4 className="text-base sm:text-lg font-extrabold text-white group-hover:text-cyan-200 leading-snug w-full block tracking-tight transition-colors duration-300">
+          {q.title || "Practice Question"}
+        </h4>
+      </div>
+
+      <div className="relative z-10 w-full">
+        <p
+          className="text-xs sm:text-sm text-slate-200 group-hover:text-slate-300 leading-relaxed font-normal w-full block transition-colors duration-300"
+          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+        >
+          {q.question || "Click to view and solve this practice problem."}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 export const PracticePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const questionFromUrl = searchParams.get("question");
@@ -546,7 +694,7 @@ export const PracticePage: React.FC = () => {
     );
   }
 
-  if (practiceSection === "interview") {
+  if (false) {
     const preparationTopics = [
      {
         id: "introduction",
@@ -1686,46 +1834,31 @@ export const PracticePage: React.FC = () => {
         </div>
       </button>
 
-      {/* AI Interview Practice */}
+      {/* Direct link to Coding Practice */}
       <button
         type="button"
-        onClick={() => {
-          setSelectedPrepTopic("ai-practice");
-
-          setPrepPracticeStarted(true);
-          setPrepCameraAllowed(null);
-          setPrepTranscript("");
-          setPrepReport(null);
-
-          setCurrentQuestionIndex(0);
-          setPrepQuestion(interviewQuestions[0]);
-          setQuestionReports([]);
-          setSkippedQuestions([]);
-          setQuestionSubmitted(false);
-          setReportCountdown(10);
-          setInterviewFinished(false);
-        }}
+        onClick={() =>
+          setPracticeSection("coding")
+        }
         className="text-left p-4 sm:p-5 lg:p-7 rounded-3xl bg-gradient-to-br from-indigo-600/10 to-purple-600/10 border border-indigo-500/30 hover:border-indigo-400 hover:shadow-lg transition flex flex-col gap-5"
       >
         <div className="w-14 h-14 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-          <Sparkles className="w-7 h-7" />
+          <Code2 className="w-7 h-7" />
         </div>
 
         <div>
           <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">
-            AI Interview Practice
+            Coding & Language Practice Lab
           </h3>
 
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-6">
-            Practice a realistic interview where the AI asks questions by voice.
-            Answer using microphone or typing, skip questions when needed,
-            receive instant feedback and get a final interview report.
+            Solve LeetCode-style algorithm problems, test code execution in Python, C++, Java, JS, and test your technical skills with MCQ & Fill in Blanks challenges.
           </p>
         </div>
 
         <div className="mt-auto flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400">
-          <Sparkles className="w-4 h-4" />
-          Start AI Interview
+          <Code2 className="w-4 h-4" />
+          Open Coding Sandbox
         </div>
       </button>
 
@@ -1737,37 +1870,11 @@ export const PracticePage: React.FC = () => {
 
   return (
     <div className="max-w-7xl w-full mx-auto px-3 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 flex flex-col gap-5 sm:gap-6 lg:gap-8 overflow-x-hidden">
-      {/* Practice Mode Selector */}
-        <div className="flex justify-center">
-          <div className="inline-flex p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-
-          <button
-            type="button"
-            onClick={() =>
-            setPracticeSection("interview")
-          }
-          className="px-5 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 text-sm font-bold"
-      >
-          Interview Preparation
-          </button>
-
-      <button
-        type="button"
-        onClick={() =>
-          setPracticeSection("coding")
-        }
-        className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold shadow-md"
-      >
-        Coding Practice
-      </button>
-
-        </div>
-      </div>
 
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-xs font-bold uppercase tracking-wider mb-2">
-          <Terminal className="w-3.5 h-3.5" /> Practice Sandbox & LeetCode Library
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 text-xs font-bold uppercase tracking-wider mb-2">
+          <Terminal className="w-3.5 h-3.5 text-purple-400" /> Practice Sandbox & LeetCode Library
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
           LeetCode Algorithms, MCQs & Language Fill-in-the-Blanks
@@ -1778,16 +1885,20 @@ export const PracticePage: React.FC = () => {
       </div>
 
       {/* Main Category Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          {["All", "Coding", "Fill in Blanks", "MCQ", "Behavioral", "Technical"].map((tab) => (
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800/80 pb-4">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+          {["All", "Coding", "Fill in Blanks", "MCQ", "Behavioral", "Technical"].map((tab, idx) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+              onMouseEnter={() => playPracticeChime(550 + idx * 40)}
+              onClick={() => {
+                playPracticeChime(700 + idx * 50);
+                setActiveTab(tab);
+              }}
+              className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all transform hover:scale-105 cursor-pointer whitespace-nowrap ${
                 activeTab === tab
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white font-extrabold shadow-lg shadow-indigo-500/30 border border-purple-300/40"
+                  : "bg-[#1A1D2B] text-slate-300 border border-slate-700/80 hover:border-purple-400 hover:text-white hover:bg-[#22263B]"
               }`}
             >
               {tab}
@@ -1796,165 +1907,226 @@ export const PracticePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Language / Topic Selection Prompt bar */}
-      <div className="p-4 rounded-2xl bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <Cpu className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+      {/* Language / Topic Selection Prompt bar with Rich Glass Tint */}
+      <div 
+        onMouseEnter={() => playPracticeChime(600)}
+        className="relative p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#1B1838] via-[#15162B] to-[#111322] border-2 border-purple-500/40 hover:border-purple-400/80 overflow-hidden shadow-2xl shadow-purple-950/70 group transform hover:-translate-y-3 hover:scale-[1.015] transition-all duration-500 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer"
+      >
+        {/* Top glowing light beam when box opens/moves forward */}
+        <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-transparent via-purple-200 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20" />
+
+        {/* Soft light background gradient fill overlay that smoothly fades on hover */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/25 via-pink-600/15 to-indigo-600/20 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none" />
+
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border border-purple-400/50 flex items-center justify-center shrink-0 shadow-lg text-purple-300">
+            <Cpu className="w-5 h-5 text-purple-300" />
+          </div>
           <div>
-            <h4 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
-              Choose Language / Topic for Fill-in-Blanks & MCQs:
+            <h4 className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider">
+              CHOOSE LANGUAGE / TOPIC FOR FILL-IN-BLANKS & MCQS:
             </h4>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] text-purple-200/90 mt-0.5 font-medium">
               Filter questions or generate new custom AI practice loops for your exact tech stack.
             </p>
           </div>
         </div>
 
-          <div className="flex flex-col gap-3 w-full md:w-auto">
-
-            {/* Language / Topic */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              {[
-                "All",
-                "Python",
-                "C",
-                "Java",
-                "C++",
-                "JavaScript",
-                "SQL",
-                "DSA",
-              ].map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() =>
-                    setSelectedLanguageFilter(lang)
-                  }
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                    selectedLanguageFilter === lang
-                      ? "bg-indigo-600 text-white shadow-xs"
-                      : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-400"
-                  }`}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
-
-            {/* Difficulty */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                Difficulty:
-              </span>
-
-              {["Easy", "Medium", "Hard"].map(
-                (level) => (
-                                <button
-                key={level}
-                type="button"
-                onClick={() =>
-                  setSelectedDifficulty(level)
-                }
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  selectedDifficulty === level
-                    ? "bg-emerald-600 text-white"
-                    : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+        <div className="relative z-10 flex flex-col gap-3 w-full md:w-auto">
+          {/* Language / Topic buttons */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              "All",
+              "Python",
+              "C",
+              "Java",
+              "C++",
+              "JavaScript",
+              "SQL",
+              "DSA",
+            ].map((lang) => (
+              <button
+                key={lang}
+                onMouseEnter={() => playPracticeChime(600)}
+                onClick={() => {
+                  playPracticeChime(750);
+                  setSelectedLanguageFilter(lang);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all transform hover:scale-105 cursor-pointer ${
+                  selectedLanguageFilter === lang
+                    ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-extrabold shadow-md shadow-purple-500/40 border border-purple-300/50"
+                    : "bg-[#1E2138] text-purple-200 border border-purple-500/30 hover:bg-purple-900/40 hover:text-white"
                 }`}
               >
-                {level}
+                {lang}
               </button>
-              )
-              )}
+            ))}
+          </div>
 
-                {(
+          {/* Difficulty & Generate AI Questions */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-slate-300">
+              Difficulty:
+            </span>
+
+            {["Easy", "Medium", "Hard"].map((level) => {
+              const activeColorClass =
+                level === "Easy"
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-extrabold shadow-md shadow-emerald-500/40 border border-emerald-300/50"
+                  : level === "Medium"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white font-extrabold shadow-md shadow-amber-500/40 border border-amber-300/50"
+                  : "bg-gradient-to-r from-rose-500 to-pink-600 text-white font-extrabold shadow-md shadow-rose-500/40 border border-rose-300/50";
+
+              return (
                 <button
+                  key={level}
                   type="button"
-                  onClick={handleGenerateCustomQuestions}
-                  disabled={generatingCustom}
-                  className="px-3.5 py-1.5 rounded-lg bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-extrabold shadow-sm flex items-center gap-1.5 transition disabled:opacity-50"
+                  onMouseEnter={() => playPracticeChime(620)}
+                  onClick={() => {
+                    playPracticeChime(780);
+                    setSelectedDifficulty(level);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all transform hover:scale-105 cursor-pointer ${
+                    selectedDifficulty === level
+                      ? `${activeColorClass} shadow-md`
+                      : "bg-[#1E2138] text-purple-200 border border-slate-700 hover:text-white"
+                  }`}
                 >
-                  {generatingCustom ? (
-                    <>
-                      <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="w-3.5 h-3.5" />
-                      Generate {selectedDifficulty}{" "}
-                      {selectedLanguageFilter === "All"
-                        ? "Mixed AI"
-                        : selectedLanguageFilter} Questions
-                    </>
-                  )}
+                  {level}
                 </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onMouseEnter={() => playPracticeChime(700)}
+              onClick={() => {
+                playPracticeChime(900);
+                handleGenerateCustomQuestions();
+              }}
+              disabled={generatingCustom}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold shadow-lg shadow-purple-500/40 border border-purple-300/40 text-xs flex items-center gap-1.5 transition-all transform hover:scale-105 cursor-pointer disabled:opacity-50"
+            >
+              {generatingCustom ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="w-3.5 h-3.5 text-white" />
+                  Generate {selectedDifficulty}{" "}
+                  {selectedLanguageFilter === "All"
+                    ? "Mixed AI"
+                    : selectedLanguageFilter} Questions
+                </>
               )}
-            </div>
+            </button>
           </div>
         </div>
+      </div>
 
-        {/* Practice Progress Summary */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800">
-            <p className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
-              Question Bank
-            </p>
+        {/* Practice Progress Summary Cards (Rich Vibrant Glass Color Fills) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div
+            onMouseEnter={() => playPracticeChime(540)}
+            className="relative overflow-hidden px-4.5 py-3.5 rounded-2xl bg-gradient-to-br from-[#121B38] via-[#15172C] to-[#0F111E] border-2 border-cyan-400/50 hover:border-cyan-300 transform hover:-translate-y-2.5 hover:scale-[1.025] hover:shadow-2xl transition-all duration-500 shadow-xl shadow-cyan-950/60 flex items-center justify-between group cursor-pointer"
+          >
+            {/* Luminous Cyan Glass Overlay that smoothly fades out on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 via-indigo-500/20 to-transparent group-hover:opacity-20 transition-opacity duration-500 pointer-events-none" />
+            {/* Top glowing light beam when box opens/moves forward */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-            <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-              {
-                questions.filter((q) =>
-                  selectedLanguageFilter === "All"
-                    ? true
-                    : q.topicOrLanguage?.toLowerCase() ===
-                      selectedLanguageFilter.toLowerCase()
-                ).length
-              }
-            </p>
-
-            <p className="text-xs text-slate-500 mt-1">
-              {selectedLanguageFilter === "All"
-                ? "Total available questions"
-                : `${selectedLanguageFilter} questions`}
-            </p>
+            <div className="relative z-10">
+              <p className="text-[10px] uppercase tracking-wider font-black text-cyan-300 flex items-center gap-1">
+                <span>Question Bank</span>
+                <Sparkles className="w-3 h-3 text-cyan-300" />
+              </p>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-2xl font-black text-white group-hover:text-cyan-200 transition-colors duration-500">
+                  {
+                    questions.filter((q) =>
+                      selectedLanguageFilter === "All"
+                        ? true
+                        : q.topicOrLanguage?.toLowerCase() ===
+                          selectedLanguageFilter.toLowerCase()
+                    ).length
+                  }
+                </span>
+                <span className="text-[10px] text-cyan-200/80 font-semibold">
+                  {selectedLanguageFilter === "All" ? "Total questions" : `${selectedLanguageFilter} questions`}
+                </span>
+              </div>
+            </div>
+            <div className="relative z-10 p-2.5 rounded-xl bg-gradient-to-br from-cyan-500/30 to-indigo-500/30 text-cyan-200 border border-cyan-400/60 shadow-md shrink-0">
+              <Cpu className="w-4 h-4" />
+            </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800">
-            <p className="text-[11px] uppercase tracking-wider font-bold text-emerald-600">
-              Solved
-            </p>
+          <div
+            onMouseEnter={() => playPracticeChime(580)}
+            className="relative overflow-hidden px-4.5 py-3.5 rounded-2xl bg-gradient-to-br from-[#0F2824] via-[#122224] to-[#0F111E] border-2 border-emerald-400/50 hover:border-emerald-300 transform hover:-translate-y-2.5 hover:scale-[1.025] hover:shadow-2xl transition-all duration-500 shadow-xl shadow-emerald-950/60 flex items-center justify-between group cursor-pointer"
+          >
+            {/* Luminous Emerald Glass Overlay that smoothly fades out on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/30 via-teal-500/20 to-transparent group-hover:opacity-20 transition-opacity duration-500 pointer-events-none" />
+            {/* Top glowing light beam when box opens/moves forward */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-200/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-            <p className="text-2xl font-black text-emerald-600 mt-1">
-              {
-                questions.filter((q) => {
-                  const matchesLanguage =
-                    selectedLanguageFilter === "All" ||
-                    q.topicOrLanguage?.toLowerCase() ===
-                      selectedLanguageFilter.toLowerCase();
+            <div className="relative z-10">
+              <p className="text-[10px] uppercase tracking-wider font-black text-emerald-300 flex items-center gap-1">
+                <span>Solved</span>
+                <CheckCircle2 className="w-3 h-3 text-emerald-300" />
+              </p>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-2xl font-black text-white group-hover:text-emerald-200 transition-colors duration-500">
+                  {
+                    questions.filter((q) => {
+                      const matchesLanguage =
+                        selectedLanguageFilter === "All" ||
+                        q.topicOrLanguage?.toLowerCase() ===
+                          selectedLanguageFilter.toLowerCase();
 
-                  return (
-                    matchesLanguage &&
-                    solvedAttempts[q.id] !== undefined
-                  );
-                }).length
-              }
-            </p>
-
-            <p className="text-xs text-slate-500 mt-1">
-              Problems attempted
-            </p>
+                      return (
+                        matchesLanguage &&
+                        solvedAttempts[q.id] !== undefined
+                      );
+                    }).length
+                  }
+                </span>
+                <span className="text-[10px] text-emerald-200/80 font-semibold">Attempted</span>
+              </div>
+            </div>
+            <div className="relative z-10 p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/30 to-teal-500/30 text-emerald-200 border border-emerald-400/60 shadow-md shrink-0">
+              <Award className="w-4 h-4" />
+            </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800">
-            <p className="text-[11px] uppercase tracking-wider font-bold text-indigo-600">
-              Current Difficulty
-            </p>
+          <div
+            onMouseEnter={() => playPracticeChime(620)}
+            className="relative overflow-hidden px-4.5 py-3.5 rounded-2xl bg-gradient-to-br from-[#2F1528] via-[#231526] to-[#0F111E] border-2 border-fuchsia-400/50 hover:border-fuchsia-300 transform hover:-translate-y-2.5 hover:scale-[1.025] hover:shadow-2xl transition-all duration-500 shadow-xl shadow-fuchsia-950/60 flex items-center justify-between group cursor-pointer"
+          >
+            {/* Luminous Fuchsia Glass Overlay that smoothly fades out on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/30 via-rose-500/20 to-transparent group-hover:opacity-20 transition-opacity duration-500 pointer-events-none" />
+            {/* Top glowing light beam when box opens/moves forward */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-fuchsia-200/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-            <p className="text-2xl font-black text-indigo-600 mt-1">
-              {selectedDifficulty}
-            </p>
-
-            <p className="text-xs text-slate-500 mt-1">
-              {filteredQuestions.length} questions available
-            </p>
+            <div className="relative z-10">
+              <p className="text-[10px] uppercase tracking-wider font-black text-fuchsia-300 flex items-center gap-1">
+                <span>Current Difficulty</span>
+                <Wand2 className="w-3 h-3 text-fuchsia-300" />
+              </p>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-2xl font-black text-white group-hover:text-fuchsia-200 transition-colors duration-500">
+                  {selectedDifficulty}
+                </span>
+                <span className="text-[10px] text-fuchsia-200/80 font-semibold">
+                  {filteredQuestions.length} available
+                </span>
+              </div>
+            </div>
+            <div className="relative z-10 p-2.5 rounded-xl bg-gradient-to-br from-fuchsia-500/30 to-rose-500/30 text-fuchsia-200 border border-fuchsia-400/60 shadow-md shrink-0">
+              <Terminal className="w-4 h-4" />
+            </div>
           </div>
         </div>
 
@@ -1977,89 +2149,53 @@ export const PracticePage: React.FC = () => {
             </div>
           ) : (
             filteredQuestions.map((q) => (
-              <button
+              <InteractiveQuestionCard
                 key={q.id}
-                onClick={() => handleSelectQuestion(q)}
-                className={`p-5 rounded-2xl text-left border transition flex flex-col gap-2 ${
-                  selectedQuestion?.id === q.id
-                    ? "bg-indigo-600/10 dark:bg-indigo-600/10 border-indigo-500/40 shadow-md"
-                    : "bg-white dark:bg-[#15151A] border-slate-200 dark:border-slate-800 hover:border-indigo-400"
-                }`}
-              >
-                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                        {q.type}
-                      </span>
-
-                      {q.topicOrLanguage && (
-                        <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold border border-indigo-500/20">
-                          {q.topicOrLanguage}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {solvedAttempts[q.id] !== undefined && (
-                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-extrabold">
-                          ✓ Solved {Math.round(solvedAttempts[q.id])}%
-                        </span>
-                      )}
-
-                      <span
-                        className={`text-[11px] font-bold ${
-                          q.difficulty === "Easy"
-                            ? "text-emerald-500"
-                            : q.difficulty === "Medium"
-                            ? "text-indigo-500"
-                            : "text-rose-500"
-                        }`}
-                      >
-                        {q.difficulty}
-                      </span>
-                    </div>
-                  </div>
-                <p className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">{q.title}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{q.question}</p>
-              </button>
+                q={q}
+                isSelected={selectedQuestion?.id === q.id}
+                solvedScore={solvedAttempts[q.id]}
+                onSelect={() => handleSelectQuestion(q)}
+              />
             ))
           )}
         </div>
 
-        {/* Right Active Question Sandbox */}
+        {/* Right Active Question Sandbox with Rich Glass Tint */}
         {selectedQuestion && (
-          <div className="lg:col-span-7 bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl flex flex-col gap-6">
+          <div className="relative overflow-hidden group lg:col-span-7 bg-gradient-to-br from-[#1A183B] via-[#15162B] to-[#111322] border-2 border-purple-500/40 hover:border-purple-400/80 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl shadow-purple-950/70 flex flex-col gap-6 transform hover:-translate-y-2.5 hover:scale-[1.015] transition-all duration-500 cursor-pointer">
+            {/* Top glowing light beam when box opens/moves forward */}
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-transparent via-purple-200 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20" />
             <div>
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-500/20">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-purple-200 text-xs font-black border border-purple-400/50 shadow-sm">
                   {selectedQuestion.type} • {selectedQuestion.difficulty}
                 </span>
                 {selectedQuestion.topicOrLanguage && (
-                  <span className="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-bold border border-purple-500/20">
+                  <span className="px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/30 to-blue-500/30 text-cyan-200 text-xs font-black border border-cyan-400/50 shadow-sm">
                     Topic: {selectedQuestion.topicOrLanguage}
                   </span>
                 )}
               </div>
-              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mt-3">
+              <h2 className="text-xl sm:text-2xl font-black text-white mt-3 tracking-tight">
                 {selectedQuestion.title}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-200 mt-2 leading-relaxed font-medium">
                 {selectedQuestion.question}
               </p>
             </div>
 
             {/* Step-by-Step Hints Drawer */}
             {selectedQuestion.hints && selectedQuestion.hints.length > 0 && (
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 flex flex-col gap-2">
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-950/60 via-orange-950/40 to-[#121422] border border-amber-500/40 text-amber-200 flex flex-col gap-2 shadow-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold flex items-center gap-1.5">
-                    <Lightbulb className="w-4 h-4 text-amber-500" /> Need a hint?
+                  <span className="text-xs font-black flex items-center gap-1.5 text-amber-300">
+                    <Lightbulb className="w-4 h-4 text-amber-400" /> Need a hint?
                   </span>
                   {revealedHintIndex < selectedQuestion.hints.length - 1 && (
                     <button
                       type="button"
                       onClick={() => setRevealedHintIndex((prev) => prev + 1)}
-                      className="px-3 py-1 rounded-xl bg-amber-500 text-slate-950 text-xs font-extrabold hover:bg-amber-400 transition"
+                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-xs font-black hover:from-amber-400 hover:to-orange-400 transition shadow-md cursor-pointer"
                     >
                       Reveal {revealedHintIndex === -1 ? "Hint 1" : `Hint ${revealedHintIndex + 2}`}
                     </button>
@@ -2071,7 +2207,7 @@ export const PracticePage: React.FC = () => {
                     {selectedQuestion.hints.slice(0, revealedHintIndex + 1).map((hint, i) => (
                       <p
                         key={i}
-                        className="text-xs bg-white/80 dark:bg-slate-900/80 p-2.5 rounded-xl border border-amber-500/20 text-slate-800 dark:text-slate-200 font-medium"
+                        className="text-xs bg-[#1A1C30]/90 p-3 rounded-xl border border-amber-500/30 text-amber-100 font-medium leading-relaxed"
                       >
                         {hint}
                       </p>
@@ -2083,15 +2219,15 @@ export const PracticePage: React.FC = () => {
 
             {/* MCQ Options */}
             {selectedQuestion.type === "MCQ" && selectedQuestion.options && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 {selectedQuestion.options.map((opt, i) => (
                   <button
                     key={i}
                     onClick={() => setMcqChoice(opt)}
-                    className={`p-3.5 rounded-xl border text-xs font-medium text-left transition ${
+                    className={`p-3.5 rounded-xl border text-xs text-left transition transform hover:scale-[1.01] cursor-pointer ${
                       mcqChoice === opt
-                        ? "bg-indigo-600 text-white border-indigo-600 font-bold"
-                        : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-400"
+                        ? "border-2 border-purple-300 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold shadow-lg shadow-purple-500/40"
+                        : "border border-purple-500/30 bg-[#1E2138] text-purple-100 hover:border-purple-400 hover:bg-[#252945] font-medium"
                     }`}
                   >
                     {opt}
@@ -2102,21 +2238,21 @@ export const PracticePage: React.FC = () => {
 
             {/* Fill in the Blanks UI */}
             {selectedQuestion.type === "Fill in Blanks" && (
-              <div className="flex flex-col gap-4 p-5 rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 font-mono text-xs">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <div className="flex flex-col gap-4 p-5 rounded-2xl bg-gradient-to-br from-[#0F1424] to-[#14182E] border border-cyan-500/40 text-cyan-100 font-mono text-xs shadow-lg">
+                <span className="text-[11px] font-extrabold text-cyan-300 uppercase tracking-wider">
                   Fill in the Blank Snippet ({selectedQuestion.topicOrLanguage || "Language"})
                 </span>
                 <pre className="text-amber-300 font-mono whitespace-pre-wrap leading-relaxed">
                   {selectedQuestion.fillBlankSnippet || "/* Fill in the missing syntax below */"}
                 </pre>
                 <div className="flex items-center gap-3 mt-2">
-                  <span className="text-slate-400 font-bold">Answer:</span>
+                  <span className="text-cyan-300 font-bold">Answer:</span>
                   <input
                     type="text"
                     value={fillBlankInput}
                     onChange={(e) => setFillBlankInput(e.target.value)}
                     placeholder="Type missing keyword or value..."
-                    className="flex-1 px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#1B1F36] border border-cyan-400/50 text-white font-bold text-xs focus:ring-2 focus:ring-cyan-400 outline-none"
                   />
                 </div>
               </div>
@@ -2139,7 +2275,7 @@ export const PracticePage: React.FC = () => {
                 value={userAnswerText}
                 onChange={(e) => setUserAnswerText(e.target.value)}
                 placeholder="Write your STAR framing or technical explanation here..."
-                className="w-full p-4 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none leading-relaxed resize-none"
+                className="w-full p-4 rounded-2xl border-2 border-purple-500/30 bg-[#1A1C30] text-white text-sm focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none leading-relaxed resize-none shadow-inner placeholder-purple-300/50 font-medium"
               />
             )}
 
@@ -2147,7 +2283,7 @@ export const PracticePage: React.FC = () => {
             <button
               onClick={handleRunEvaluation}
               disabled={evaluating}
-              className="py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg shadow-indigo-500/20 transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              className="py-3.5 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-black text-sm shadow-xl shadow-indigo-500/40 border border-purple-300/40 transform hover:scale-[1.01] transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {evaluating ? (
                 <>

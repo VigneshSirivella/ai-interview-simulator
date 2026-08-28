@@ -332,20 +332,50 @@ app.post("/api/interview/question", async (req, res) => {
     return res.status(404).json({ error: "Interview session not found" });
   }
 
-  const prompt = `You are a Principal Engineer and Lead Technical Recruiter at ${session.company}. 
-Generate Question #${questionIndex + 1} of ${session.totalQuestions} for a candidate interviewing for the position of "${session.role}".
-Difficulty: ${session.difficulty}
-Interview Type: ${session.type}
+  const isOneOnOne = session.type?.includes("1-on-1") || session.type?.includes("HR") || session.type?.includes("Real Interview") || session.company === "Real Recruiter";
 
-Previous questions asked in this session: ${JSON.stringify(
-    session.questions.map((q: any) => q.question)
-  )}
+  if (isOneOnOne) {
+    const EXACT_ONE_ON_ONE_QUESTIONS = [
+      {
+        question: "Tell me about yourself, your background, and your key strengths.",
+        idealKeyPoints: ["Clear background summary", "Core technical and professional strengths", "Passion and key career achievements"],
+      },
+      {
+        question: "Why should we select you over other candidates for this position?",
+        idealKeyPoints: ["Unique skill combinations", "Alignment with role requirements", "Concrete value and drive you bring to the team"],
+      },
+      {
+        question: "Why do you choose our company, and what attracted you to work with us?",
+        idealKeyPoints: ["Understanding of company mission", "Enthusiasm for company products & engineering culture", "Long-term career alignment"],
+      },
+      {
+        question: "What is your biggest professional achievement or key strength?",
+        idealKeyPoints: ["Concrete example of a major accomplishment", "Problem solving approach", "Demonstrated positive impact"],
+      },
+      {
+        question: "Where do you see yourself in 3 to 5 years, and how does this position fit into your career goals?",
+        idealKeyPoints: ["Clear vision for professional growth", "Commitment to technical mastery and leadership", "Alignment with career goals"],
+      },
+    ];
 
-Requirements:
-- Make the question realistic, engaging, and aligned with standard ${session.company} interview standards for ${session.role}.
-- If technical/coding, include a short problem statement or code snippet if relevant.
-- Provide 3 ideal key points that a candidate should mention in a stellar answer.
-- Output JSON format matching the schema provided.`;
+    const selectedQ = EXACT_ONE_ON_ONE_QUESTIONS[questionIndex % EXACT_ONE_ON_ONE_QUESTIONS.length];
+
+    const questionObj = {
+      id: `q_${sessionId}_${questionIndex + 1}`,
+      questionNumber: questionIndex + 1,
+      category: "1-on-1 Real Interview",
+      question: selectedQ.question,
+      idealKeyPoints: selectedQ.idealKeyPoints,
+    };
+
+    if (session.questions.length <= questionIndex) {
+      session.questions.push(questionObj);
+    } else {
+      session.questions[questionIndex] = questionObj;
+    }
+
+    return res.json({ question: questionObj, totalQuestions: session.totalQuestions });
+  }
 
   try {
     let questionText = "";
@@ -383,16 +413,28 @@ Requirements:
     }
 
     if (!questionText) {
-      // Fallback fallback question generator
-      const fallbackQuestions = [
-        `How do you handle microservices synchronization and event consistency at ${session.company}?`,
-        `Describe how you optimize frontend bundle sizes and reduce First Contentful Paint (FCP) for a complex dashboard.`,
-        `Explain how garbage collection works in V8 or Java runtime, and how memory leaks occur in production.`,
-        `Design a rate limiter for API endpoints handling 100,000 requests per second.`,
-        `Tell me about a technical disagreement you had with a senior tech lead and how you resolved it.`,
-      ];
-      questionText = fallbackQuestions[questionIndex % fallbackQuestions.length];
-      keyPoints = ["Architecture trade-offs", "Scalability considerations", "Concrete metrics & examples"];
+      if (isOneOnOne) {
+        const realOneOnOneQuestions = [
+          "Tell me about yourself, your background, and your key strengths.",
+          "Why should we select you over other candidates for this position?",
+          "Why do you choose our company, and what attracted you to work with us?",
+          "What is your biggest professional achievement or key strength?",
+          "Tell me about a time when you had to work under a tight deadline or high pressure. How did you handle it?",
+          "Where do you see yourself in 3 to 5 years, and how does this position fit into your career goals?",
+        ];
+        questionText = realOneOnOneQuestions[questionIndex % realOneOnOneQuestions.length];
+        keyPoints = ["Structured narrative", "Specific concrete achievements", "Strong enthusiasm and clarity"];
+      } else {
+        const fallbackQuestions = [
+          `How do you handle microservices synchronization and event consistency at ${session.company}?`,
+          `Describe how you optimize frontend bundle sizes and reduce First Contentful Paint (FCP) for a complex dashboard.`,
+          `Explain how garbage collection works in V8 or Java runtime, and how memory leaks occur in production.`,
+          `Design a rate limiter for API endpoints handling 100,000 requests per second.`,
+          `Tell me about a technical disagreement you had with a senior tech lead and how you resolved it.`,
+        ];
+        questionText = fallbackQuestions[questionIndex % fallbackQuestions.length];
+        keyPoints = ["Architecture trade-offs", "Scalability considerations", "Concrete metrics & examples"];
+      }
     }
 
     const questionObj = {

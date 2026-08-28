@@ -170,7 +170,10 @@ export const AuthProvider: React.FC<{
           "Software Engineer",
 
         profilePicture:
-          profile.profile_picture || undefined,
+          profile.profile_picture ||
+          localStorage.getItem("user_custom_avatar") ||
+          user?.profilePicture ||
+          undefined,
 
         githubUrl:
           profile.github ||
@@ -426,7 +429,11 @@ export const AuthProvider: React.FC<{
         preferredLanguage:
           profile.preferred_language || "Python",
         profilePicture:
-          profile.profile_picture || undefined,
+          profile.profile_picture ||
+          localStorage.getItem("user_custom_avatar") ||
+          updatedData.profilePicture ||
+          user?.profilePicture ||
+          undefined,
         githubUrl: profile.github || "",
         linkedinUrl: profile.linkedin || "",
         targetRole:

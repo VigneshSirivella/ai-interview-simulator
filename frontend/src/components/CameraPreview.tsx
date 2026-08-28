@@ -91,6 +91,12 @@ export const CameraPreview: React.FC<
   const lastAnalysisEmitRef =
     useRef(0);
 
+  const lastFrameTimeRef =
+    useRef(0);
+
+  const lastStateUpdateRef =
+    useRef(0);
+
   const streamRef =
     useRef<MediaStream | null>(null);
 
@@ -206,10 +212,18 @@ export const CameraPreview: React.FC<
         return;
       }
 
-      try {
-        const timestamp =
-          performance.now();
+      const timestamp = performance.now();
 
+      // Throttle MediaPipe inference to ~15 FPS (66ms) to prevent CPU hogging
+      if (timestamp - lastFrameTimeRef.current < 66) {
+        animationFrameRef.current =
+          requestAnimationFrame(analyzeFrame);
+        return;
+      }
+
+      lastFrameTimeRef.current = timestamp;
+
+      try {
         const result =
           faceLandmarker.detectForVideo(
             video,
@@ -227,10 +241,6 @@ export const CameraPreview: React.FC<
         const detected =
           result.faceLandmarks &&
           result.faceLandmarks.length > 0;
-
-        setFaceDetected(
-          detected
-        );
 
         if (detected) {
           faceFramesRef.current += 1;
@@ -269,8 +279,6 @@ export const CameraPreview: React.FC<
           }
         }
 
-        setHeadCentered(centered);
-
         if (centered) {
           centeredFramesRef.current += 1;
         }
@@ -285,10 +293,6 @@ export const CameraPreview: React.FC<
               )
             : 0;
 
-        setCameraAttentionScore(
-          attentionScore
-        );
-
         const score =
           totalFramesRef.current > 0
             ? Math.round(
@@ -298,8 +302,6 @@ export const CameraPreview: React.FC<
                 ) * 100
               )
             : 0;
-          
-          setFacePresenceScore(score);
 
         let goodPosture = false;
 
@@ -365,10 +367,6 @@ export const CameraPreview: React.FC<
             }
           }
 
-          setPostureGood(
-            goodPosture
-          );
-
           if (goodPosture) {
             postureFramesRef.current += 1;
           }
@@ -383,9 +381,16 @@ export const CameraPreview: React.FC<
                 )
               : 0;
 
-          setPostureScore(
-            currentPostureScore
-          );
+        // Throttle React UI State updates to ~300ms to avoid 60FPS re-render lag
+        if (timestamp - lastStateUpdateRef.current >= 300) {
+          lastStateUpdateRef.current = timestamp;
+          setFaceDetected(detected);
+          setHeadCentered(centered);
+          setCameraAttentionScore(attentionScore);
+          setFacePresenceScore(score);
+          setPostureGood(goodPosture);
+          setPostureScore(currentPostureScore);
+        }
 
       const now =
         performance.now();

@@ -19,6 +19,8 @@ import {
   Rocket,
   Award,
   Layers,
+  Clock,
+  Building2,
 } from "lucide-react";
 
 export const ResumeAnalyzerPage: React.FC = () => {
@@ -34,8 +36,10 @@ export const ResumeAnalyzerPage: React.FC = () => {
     useState<
       {
         title: string;
+        company?: string;
         category: string;
         reason: string;
+        deadline?: string;
       }[]
     >([]);
 
@@ -149,7 +153,7 @@ Demonstrated leadership in collaborative capstone projects, backend microservice
         setLoadingJobs(true);
 
         const jobs =
-          await apiService.getJobRecommendations();
+          await apiService.getJobRecommendations(targetRole, Date.now());
 
         setJobRecommendations(
           jobs.recommendations || []
@@ -202,151 +206,123 @@ Demonstrated leadership in collaborative capstone projects, backend microservice
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8 items-start">
-        {/* Left Form */}
+        {/* Left Form Box with Vibrant Background Fill & Hover Fade-Out */}
         <form
           onSubmit={handleAnalyze}
-          className="lg:col-span-6 bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl flex flex-col gap-5 sm:gap-6"
+          className="relative overflow-hidden group lg:col-span-6 bg-[#15151A] border border-indigo-500/50 hover:border-indigo-400/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl shadow-indigo-500/10 flex flex-col gap-5 sm:gap-6 transform hover:-translate-y-3 hover:scale-[1.02] transition-all duration-500 cursor-pointer"
         >
-          {/* Toggle Input Mode */}
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={() => setInputMode("upload")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  inputMode === "upload"
-                    ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                    : "text-slate-600 dark:text-slate-400"
-                }`}
-              >
-                Upload File
-              </button>
-              <button
-                type="button"
-                onClick={() => setInputMode("paste")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                  inputMode === "paste"
-                    ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                    : "text-slate-600 dark:text-slate-400"
-                }`}
-              >
-                Paste Text
-              </button>
-            </div>
+          {/* Rich vibrant background color overlay that smoothly fades out on mouse enter */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/50 via-purple-900/40 to-slate-950 group-hover:opacity-25 transition-opacity duration-500 pointer-events-none" />
+          {/* Top glowing light beam when box opens/moves forward */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-            <button
-              type="button"
-              onClick={handleFillSample}
-              className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
-            >
-              Fill Sample Resume
-            </button>
+          {/* Centered Upload File Header */}
+          <div className="relative z-10 flex items-center justify-center border-b border-indigo-500/30 pb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600/40 via-purple-600/30 to-slate-900 border border-indigo-400/40 text-white text-xs font-black uppercase tracking-wider shadow-md">
+              <Upload className="w-4 h-4 text-indigo-300" />
+              <span>Upload Resume File</span>
+            </div>
           </div>
 
-          {/* Upload Dropzone Mode */}
-          {inputMode === "upload" ? (
-            <div className="flex flex-col gap-3">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.docx,.doc,.txt,.rtf,.md"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
+          {/* Upload Dropzone */}
+          <div className="relative z-10 flex flex-col gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx,.doc,.txt,.rtf,.md"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
 
-              {!file ? (
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragLeave={() => setIsDragging(false)}
-                  onDrop={handleFileDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-8 text-center flex flex-col items-center justify-center gap-3 cursor-pointer transition ${
-                    isDragging
-                      ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40 scale-[1.01]"
-                      : "border-slate-300 dark:border-slate-700 hover:border-indigo-400 bg-slate-50/50 dark:bg-slate-800/40"
-                  }`}
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-inner">
-                    <Upload className="w-7 h-7" />
+            {!file ? (
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleFileDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`relative overflow-hidden border-2 border-dashed rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-8 text-center flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-500 group/drop ${
+                  isDragging
+                    ? "border-indigo-400 bg-indigo-900/60 scale-[1.01]"
+                    : "border-indigo-400/40 hover:border-indigo-400 bg-indigo-950/40"
+                }`}
+              >
+                {/* Dropzone subtle background gradient tint */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/30 via-purple-600/20 to-transparent group-hover/drop:opacity-30 transition-opacity duration-500 pointer-events-none" />
+
+                <div className="relative z-10 w-14 h-14 rounded-2xl bg-indigo-500/30 text-indigo-200 flex items-center justify-center shadow-lg border border-indigo-400/30">
+                  <Upload className="w-7 h-7 text-indigo-300" />
+                </div>
+                <div className="relative z-10">
+                  <p className="text-sm font-extrabold text-white">
+                    Drag & Drop your Resume here
+                  </p>
+                  <p className="text-xs text-indigo-200 mt-1">
+                    Supports PDF, DOCX, TXT or RTF (Max 10MB)
+                  </p>
+                </div>
+                <span className="relative z-10 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg transition">
+                  Browse Resume File
+                </span>
+              </div>
+            ) : (
+              <div className="relative overflow-hidden p-3.5 sm:p-4 rounded-2xl border border-indigo-500/50 bg-indigo-900/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 group/file">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/30 to-purple-600/20 pointer-events-none" />
+                <div className="relative z-10 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+                    <FileText className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-extrabold text-slate-900 dark:text-white">
-                      Drag & Drop your Resume here
+                    <p className="text-xs font-extrabold text-white truncate max-w-[200px] sm:max-w-[260px]">
+                      {file.name}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Supports PDF, DOCX, TXT or RTF (Max 10MB)
+                    <p className="text-[11px] text-indigo-200">
+                      {Math.round(file.size / 1024)} KB • Ready for AI Audit
                     </p>
                   </div>
-                  <span className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md">
-                    Browse Resume File
-                  </span>
                 </div>
-              ) : (
-                <div className="p-3 sm:p-4 rounded-2xl border border-indigo-500/30 bg-indigo-50/50 dark:bg-indigo-950/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-[260px]">
-                        {file.name}
-                      </p>
-                      <p className="text-[11px] text-slate-500">
-                        {Math.round(file.size / 1024)} KB • Ready for AI Audit
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFile(null);
-                      setResumeText("");
-                    }}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            /* Paste Text Mode */
-            <textarea
-              rows={10}
-              required
-              value={resumeText}
-              onChange={(e) => setResumeText(e.target.value)}
-              placeholder="Paste your resume content here (Summary, Technical Skills, Projects, Experience, Education)..."
-              className="w-full p-4 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 outline-none leading-relaxed resize-none font-mono"
-            />
-          )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFile(null);
+                    setResumeText("");
+                  }}
+                  className="relative z-10 p-1.5 rounded-lg text-indigo-300 hover:text-rose-400 hover:bg-rose-500/20 transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <Briefcase className="w-4 h-4 text-indigo-500" /> Target Job Role
+          {/* Target Role Box with Vibrant Accent & Gradient Fill */}
+          <div className="relative z-10">
+            <label className="block text-xs font-black uppercase tracking-wider text-indigo-200 mb-1.5 flex items-center gap-1.5">
+              <Briefcase className="w-4 h-4 text-indigo-400" /> Target Job Role
             </label>
-            <select
-              value={targetRole}
-              onChange={(e) => setTargetRole(e.target.value)}
-              className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
-            >
-              <option value="Software Engineer">Software Engineer</option>
-              <option value="Frontend Engineer">Frontend Engineer</option>
-              <option value="Backend Engineer">Backend Engineer</option>
-              <option value="Full Stack Developer">Full Stack Developer</option>
-              <option value="Data Scientist">Data Scientist</option>
-              <option value="DevOps Engineer">DevOps Engineer</option>
-              <option value="Product Manager">Product Manager</option>
-            </select>
+            <div className="relative">
+              <select
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value)}
+                className="w-full p-3.5 rounded-xl border border-indigo-500/50 bg-gradient-to-r from-indigo-950 via-purple-950 to-slate-900 text-white font-extrabold text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none cursor-pointer shadow-lg transition-all duration-300 hover:border-indigo-400"
+              >
+                <option value="Software Engineer" className="bg-slate-900 text-white">Software Engineer</option>
+                <option value="Frontend Engineer" className="bg-slate-900 text-white">Frontend Engineer</option>
+                <option value="Backend Engineer" className="bg-slate-900 text-white">Backend Engineer</option>
+                <option value="Full Stack Developer" className="bg-slate-900 text-white">Full Stack Developer</option>
+                <option value="Data Scientist" className="bg-slate-900 text-white">Data Scientist</option>
+                <option value="DevOps Engineer" className="bg-slate-900 text-white">DevOps Engineer</option>
+                <option value="Product Manager" className="bg-slate-900 text-white">Product Manager</option>
+              </select>
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading || (!resumeText.trim() && !file)}
-            className="w-full py-3.5 sm:py-4 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-xl shadow-indigo-500/20 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="relative z-10 w-full py-3.5 sm:py-4 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-black text-sm shadow-xl shadow-indigo-500/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -365,45 +341,54 @@ Demonstrated leadership in collaborative capstone projects, backend microservice
         {/* Right Output Results */}
         <div className="lg:col-span-6 flex flex-col gap-4 sm:gap-6 min-w-0">
           {result ? (
-            <div className="bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl flex flex-col gap-5 sm:gap-6 animate-fade-in min-w-0">
+            <div className="bg-[#15151A] border-2 border-indigo-500/40 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl shadow-indigo-500/10 flex flex-col gap-5 sm:gap-6 animate-fade-in min-w-0">
               {/* Score header */}
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center justify-between border-b border-indigo-500/30 pb-4">
                 <div>
-                  <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-black bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 bg-clip-text text-transparent">
                     ATS Resume Evaluation
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Target Role: {targetRole}</p>
+                  <p className="text-xs font-bold text-indigo-300 mt-0.5">Target Role: {targetRole}</p>
                 </div>
                 <ScoreBadge score={result.atsScore} size="lg" />
               </div>
 
-              {/* Subscores */}
+              {/* Subscores with Distinct Beautiful Light Color Gradients & 3D Pop Hover */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Formatting Score</p>
-                  <p className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">
+                {/* Formatting Score: Electric Sky Cyan & Blue Light Gradient */}
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-cyan-500/90 via-sky-600/85 to-indigo-900/90 border-2 border-cyan-300 shadow-xl shadow-cyan-500/30 hover:border-white hover:shadow-cyan-400/60 backdrop-blur-xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 transform cursor-pointer group">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-black uppercase tracking-wider text-cyan-100 drop-shadow">Formatting Score</p>
+                    <FileText className="w-5 h-5 text-cyan-200 group-hover:scale-125 transition-transform" />
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg mt-2 group-hover:scale-105 transition-transform origin-left">
                     {result.formattingScore}%
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Keyword Match</p>
-                  <p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400 mt-1">
+
+                {/* Keyword Match: Sunburst Amber & Pink Coral Light Gradient */}
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/90 via-pink-600/85 to-purple-900/90 border-2 border-amber-300 shadow-xl shadow-amber-500/30 hover:border-white hover:shadow-amber-400/60 backdrop-blur-xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 transform cursor-pointer group">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-black uppercase tracking-wider text-amber-100 drop-shadow">Keyword Match</p>
+                    <Target className="w-5 h-5 text-amber-200 group-hover:scale-125 transition-transform" />
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg mt-2 group-hover:scale-105 transition-transform origin-left">
                     {result.keywordDensityScore}%
                   </p>
                 </div>
               </div>
 
               {/* Extracted vs Missing Skills */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-4">
                 <div>
-                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Detected Candidate Skills
+                  <p className="text-xs font-black text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Detected Candidate Skills
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {(result.extractedSkills || []).map((skill, i) => (
                       <span
                         key={i}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-semibold"
+                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600/35 via-teal-600/25 to-slate-950 border-2 border-emerald-500/50 hover:border-emerald-400 text-emerald-200 font-extrabold text-xs shadow-md shadow-emerald-500/20 hover:-translate-y-1 hover:scale-110 transition-all duration-300 transform cursor-pointer"
                       >
                         {skill}
                       </span>
@@ -411,15 +396,15 @@ Demonstrated leadership in collaborative capstone projects, backend microservice
                   </div>
                 </div>
 
-                <div className="mt-2">
-                  <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5" /> Skill Gaps for {targetRole}
+                <div>
+                  <p className="text-xs font-black text-rose-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 text-rose-400" /> Skill Gaps for {targetRole}
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {(result.missingSkills || []).map((skill, i) => (
                       <span
                         key={i}
-                        className="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-700 dark:text-rose-300 text-xs font-semibold"
+                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600/35 via-pink-600/25 to-slate-950 border-2 border-rose-500/50 hover:border-rose-400 text-rose-200 font-extrabold text-xs shadow-md shadow-rose-500/20 hover:-translate-y-1 hover:scale-110 transition-all duration-300 transform cursor-pointer"
                       >
                         {skill}
                       </span>
@@ -430,15 +415,15 @@ Demonstrated leadership in collaborative capstone projects, backend microservice
 
               {/* Suggested Alternative Roles */}
               {result.suggestedRoles && result.suggestedRoles.length > 0 && (
-                <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 flex flex-col gap-2">
-                  <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-                    <Target className="w-4 h-4 text-indigo-500" /> Recommended Job Matches Based on Resume:
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-cyan-600/25 via-indigo-600/20 to-slate-950 border-2 border-cyan-500/40 hover:border-cyan-400 backdrop-blur-md hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 transform cursor-pointer flex flex-col gap-2.5">
+                  <span className="text-xs font-black text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Target className="w-4 h-4 text-cyan-400" /> Recommended Job Matches Based on Resume:
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {result.suggestedRoles.map((role, idx) => (
                       <span
                         key={idx}
-                        className="px-3 py-1 rounded-xl bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 text-slate-800 dark:text-slate-200 text-xs font-bold shadow-sm"
+                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/30 via-indigo-500/20 to-slate-900 border-2 border-cyan-400/50 text-white text-xs font-black shadow-md hover:scale-105 transition-transform"
                       >
                         {role}
                       </span>
@@ -447,71 +432,114 @@ Demonstrated leadership in collaborative capstone projects, backend microservice
                 </div>
               )}
 
-              {/* Career Opportunities */}
+              {/* Career Opportunities Cards */}
               <div className="flex flex-col gap-3">
                 <div>
-                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-indigo-500" />
+                  <h4 className="text-base font-black text-white flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-indigo-400" />
                     Career Opportunities
                   </h4>
-
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs font-semibold text-indigo-200 mt-0.5">
                     Jobs and internships recommended from your resume skills.
                   </p>
                 </div>
 
                 {loadingJobs ? (
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-500">
+                  <div className="p-4 rounded-2xl bg-indigo-950/40 border-2 border-indigo-500/30 text-xs font-bold text-indigo-300">
                     Finding suitable career opportunities...
                   </div>
                 ) : jobRecommendations.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {jobRecommendations.map((job, index) => (
-                      <a
-                        key={index}
-                        href={`https://www.google.com/search?q=${encodeURIComponent(
-                          job.title + " internship jobs apply"
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 hover:shadow-lg transition cursor-pointer"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <h5 className="text-sm font-bold text-slate-900 dark:text-white">
-                            {job.title}
-                          </h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                    {jobRecommendations.map((job, index) => {
+                      const careerCardThemes = [
+                        {
+                          card: "bg-gradient-to-br from-cyan-500/90 via-sky-600/85 to-indigo-950 border-2 border-cyan-300 shadow-xl shadow-cyan-500/30 hover:border-white hover:shadow-cyan-400/60",
+                          badge: "bg-cyan-300/30 text-cyan-100 border-cyan-300/50",
+                          desc: "text-cyan-100",
+                          cta: "text-cyan-200",
+                        },
+                        {
+                          card: "bg-gradient-to-br from-fuchsia-500/90 via-purple-600/85 to-slate-950 border-2 border-fuchsia-300 shadow-xl shadow-fuchsia-500/30 hover:border-white hover:shadow-fuchsia-400/60",
+                          badge: "bg-fuchsia-300/30 text-fuchsia-100 border-fuchsia-300/50",
+                          desc: "text-fuchsia-100",
+                          cta: "text-fuchsia-200",
+                        },
+                        {
+                          card: "bg-gradient-to-br from-emerald-500/90 via-teal-600/85 to-slate-950 border-2 border-emerald-300 shadow-xl shadow-emerald-500/30 hover:border-white hover:shadow-emerald-400/60",
+                          badge: "bg-emerald-300/30 text-emerald-100 border-emerald-300/50",
+                          desc: "text-emerald-100",
+                          cta: "text-emerald-200",
+                        },
+                        {
+                          card: "bg-gradient-to-br from-amber-500/90 via-rose-600/85 to-purple-950 border-2 border-amber-300 shadow-xl shadow-amber-500/30 hover:border-white hover:shadow-amber-400/60",
+                          badge: "bg-amber-300/30 text-amber-100 border-amber-300/50",
+                          desc: "text-amber-100",
+                          cta: "text-amber-200",
+                        },
+                      ];
 
-                          <span className="shrink-0 px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 text-[10px] font-bold">
-                            {job.category}
-                          </span>
-                        </div>
+                      const theme = careerCardThemes[index % careerCardThemes.length];
 
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-5">
-                          {job.reason}
-                        </p>
+                      return (
+                        <a
+                          key={index}
+                          href={`https://www.google.com/search?q=${encodeURIComponent(
+                            job.title + " internship jobs apply"
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`p-4 sm:p-5 rounded-2xl ${theme.card} backdrop-blur-xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 transform cursor-pointer group flex flex-col justify-between`}
+                        >
+                          <div>
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <h5 className="text-sm sm:text-base font-black text-white drop-shadow group-hover:scale-105 transition-transform origin-left">
+                                  {job.title}
+                                </h5>
+                                {job.company && (
+                                  <p className="text-xs font-bold text-white/90 flex items-center gap-1 mt-0.5">
+                                    <Building2 className="w-3.5 h-3.5 text-white/80" />
+                                    <span>{job.company}</span>
+                                  </p>
+                                )}
+                              </div>
+                              <span className={`shrink-0 px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider drop-shadow ${theme.badge}`}>
+                                {job.category}
+                              </span>
+                            </div>
 
-                        <p className="text-xs font-bold text-indigo-500 mt-3 flex items-center gap-1">
-                          Search & Apply
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </p>
-                      </a>
-                    ))}
+                            <p className={`text-xs font-semibold mt-2.5 leading-relaxed drop-shadow-sm ${theme.desc}`}>
+                              {job.reason}
+                            </p>
+
+                            {job.deadline && (
+                              <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/30 border border-white/20 text-[11px] font-bold text-white/90">
+                                <Clock className="w-3 h-3 text-amber-300 animate-pulse" />
+                                <span>{job.deadline}</span>
+                              </div>
+                            )}
+                          </div>
+                          <p className={`text-xs font-black mt-3.5 flex items-center gap-1.5 drop-shadow ${theme.cta} group-hover:translate-x-1.5 transition-transform`}>
+                            Search & Apply
+                            <ArrowRight className="w-4 h-4" />
+                          </p>
+                        </a>
+                      );
+                    })}
                   </div>
                 ) : (
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      No additional career recommendations found.
-                    </p>
+                  <div className="p-4 rounded-2xl bg-indigo-950/40 border-2 border-indigo-500/30 text-xs font-bold text-indigo-300">
+                    No additional career recommendations found.
                   </div>
                 )}
               </div>
 
               {/* Actionable Tips */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col gap-2 text-xs">
-                <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-600/30 via-orange-600/20 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 backdrop-blur-md hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-300 transform cursor-pointer flex flex-col gap-2 text-xs">
+                <span className="font-black text-amber-200 uppercase tracking-wider flex items-center gap-1.5">
                   <Lightbulb className="w-4 h-4 text-amber-400" /> Actionable Resume Recommendations:
                 </span>
-                <ul className="list-disc list-inside text-slate-600 dark:text-slate-300 space-y-1">
+                <ul className="list-disc list-inside text-slate-200 font-semibold space-y-1.5 leading-relaxed">
                   {(result.bulletPointFeedback || []).map((fb, i) => (
                     <li key={i}>{fb}</li>
                   ))}
@@ -522,19 +550,19 @@ Demonstrated leadership in collaborative capstone projects, backend microservice
               <button
                 type="button"
                 onClick={launchTailoredInterview}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-black text-sm shadow-xl shadow-indigo-500/25 transition flex items-center justify-center gap-2"
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 border-2 border-purple-400/50 text-white font-black text-sm sm:text-base shadow-2xl shadow-indigo-500/40 hover:-translate-y-1.5 hover:scale-[1.02] active:scale-95 transition-all duration-300 transform cursor-pointer flex items-center justify-center gap-2 group"
               >
-                <Rocket className="w-5 h-5 text-amber-300" />
+                <Rocket className="w-5 h-5 text-amber-300 group-hover:scale-125 transition-transform" />
                 <span>Launch Mock Interview Tailored to My Resume</span>
               </button>
             </div>
           ) : (
-            <div className="bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800 rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3 text-slate-400 shadow-sm min-h-[340px]">
-              <FileCheck className="w-12 h-12 text-slate-300 dark:text-slate-700" />
-              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+            <div className="relative overflow-hidden group lg:col-span-6 bg-gradient-to-br from-indigo-600/30 via-purple-600/20 to-slate-950 border-2 border-indigo-500/40 hover:border-indigo-400 rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3 text-slate-300 shadow-2xl shadow-indigo-500/10 min-h-[340px] hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300 transform cursor-pointer">
+              <FileCheck className="w-14 h-14 text-indigo-300 animate-bounce" />
+              <p className="text-lg font-black text-white">
                 Ready to Audit Candidate Resume
               </p>
-              <p className="text-xs max-w-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs font-semibold max-w-xs text-indigo-200">
                 Upload your resume file or paste text on the left to extract skills, compute ATS matching, and launch custom mock interviews.
               </p>
             </div>

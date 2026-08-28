@@ -45,7 +45,7 @@ export function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-          <div className="min-h-screen bg-slate-50 dark:bg-[#090A0F] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 bg-mesh-pattern relative selection:bg-indigo-500 selection:text-white">
+          <div className="min-h-screen bg-slate-50 dark:bg-[#0F1015] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 bg-mesh-pattern relative selection:bg-purple-500 selection:text-white">
             <Navbar />
             <div className="flex-1">
               <Routes>

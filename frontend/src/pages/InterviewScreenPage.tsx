@@ -79,6 +79,9 @@ export const InterviewScreenPage: React.FC = () => {
       selectedOption: string;
     }>>({});
 
+  const [sessionMode, setSessionMode] =
+    useState<"one-on-one" | "language-qa">("one-on-one");
+
   const [
     answeredQuestionIndexes,
     setAnsweredQuestionIndexes,
@@ -118,6 +121,9 @@ export const InterviewScreenPage: React.FC = () => {
 
   const [speakingText, setSpeakingText] =
     useState(false);
+
+  const [interviewerAvatar, setInterviewerAvatar] =
+    useState<"aria" | "ren">("aria");
 
   const [cameraEnabled, setCameraEnabled] =
     useState(false);
@@ -179,17 +185,19 @@ export const InterviewScreenPage: React.FC = () => {
     totalQuestions - 1;
 
     /*
-    * Interview duration:
-    * 3 questions = 7 minutes
-    * 4-5 questions = 10 minutes
-    * 6-10 questions = 2 minutes per question
-    */
-    const interviewMinutes =
-      totalQuestions <= 3
-        ? 7
-        : totalQuestions <= 5
-        ? 10
-        : totalQuestions * 2;
+     * Interview duration:
+     * 1-on-1 interview: 1 minute per question (1 min for 1 question, 5 min for 5 questions)
+     * Technical interview: 2-3 minutes per question
+     */
+    const isOneOnOneMode = sessionMode === "one-on-one";
+
+    const interviewMinutes = isOneOnOneMode
+      ? Math.max(totalQuestions * 1, 1)
+      : totalQuestions <= 3
+      ? 7
+      : totalQuestions <= 5
+      ? 10
+      : totalQuestions * 2;
 
     const totalInterviewSeconds =
       interviewMinutes * 60;
@@ -243,6 +251,10 @@ export const InterviewScreenPage: React.FC = () => {
       ) {
         setTotalQuestions(savedTotal);
       }
+
+      if (parsed.sessionMode) {
+        setSessionMode(parsed.sessionMode as "one-on-one" | "language-qa");
+      }
     } catch (storageError) {
       console.warn(
         "Unable to read interview options:",
@@ -262,9 +274,10 @@ export const InterviewScreenPage: React.FC = () => {
     const timerKey =
       `interview-end-time-${sessionId}`;
 
-    // Read the actual question count saved during setup.
+    // Read the actual question count and session mode saved during setup.
     let effectiveTotalQuestions =
       totalQuestions;
+    let effectiveSessionMode = sessionMode;
 
     const savedOptions =
       sessionStorage.getItem(
@@ -287,17 +300,22 @@ export const InterviewScreenPage: React.FC = () => {
           effectiveTotalQuestions =
             savedTotal;
         }
+
+        if (parsed.sessionMode) {
+          effectiveSessionMode = parsed.sessionMode;
+        }
       } catch {
         // Use current totalQuestions
       }
     }
 
-    const durationMinutes =
-      effectiveTotalQuestions <= 3
-        ? 7
-        : effectiveTotalQuestions <= 5
-        ? 10
-        : effectiveTotalQuestions * 2;
+    const durationMinutes = effectiveSessionMode === "one-on-one"
+      ? Math.max(effectiveTotalQuestions * 1, 1)
+      : effectiveTotalQuestions <= 3
+      ? 7
+      : effectiveTotalQuestions <= 5
+      ? 10
+      : effectiveTotalQuestions * 2;
 
     const durationSeconds =
       durationMinutes * 60;
@@ -306,7 +324,7 @@ export const InterviewScreenPage: React.FC = () => {
       localStorage.getItem(timerKey)
     );
 
-    if (!endTime) {
+    if (!endTime || (endTime - Date.now()) > durationSeconds * 1000) {
       endTime =
         Date.now() +
         durationSeconds * 1000;
@@ -348,7 +366,7 @@ export const InterviewScreenPage: React.FC = () => {
         expiryHandled = true;
 
         try {
-          await apiService.endInterview(
+          const res = await apiService.endInterview(
             sessionId,
             "Time expired",
             "Interview automatically ended because the allotted time expired."
@@ -362,7 +380,11 @@ export const InterviewScreenPage: React.FC = () => {
             timerKey
           );
 
-          navigate("/dashboard");
+          if (answeredQuestionIndexes.size > 0 || res.has_answers) {
+            navigate(`/result/${sessionId}`);
+          } else {
+            navigate("/dashboard");
+          }
         } catch (requestError) {
           console.error(
             "Timer expiry error:",
@@ -464,9 +486,74 @@ export const InterviewScreenPage: React.FC = () => {
             currentQuestionIndex
           );
 
-        setCurrentQuestion(
-          response.question
-        );
+        let finalQ = response.question;
+
+        const savedOpt = sessionStorage.getItem(`interview-options-${sessionId}`);
+        let activeMode = sessionMode;
+        if (savedOpt) {
+          try {
+            const parsedOpt = JSON.parse(savedOpt);
+            if (parsedOpt.sessionMode) activeMode = parsedOpt.sessionMode;
+          } catch {}
+        }
+
+        if (activeMode === "one-on-one" || response.question?.category?.includes("1-on-1")) {
+          let qText = response.question?.question || "";
+          const lowerQ = qText.toLowerCase();
+          const forbiddenTerms = [
+            "foodz",
+            "mysql",
+            "python",
+            "javascript",
+            "schema",
+            "checkout",
+            "cart",
+            "integration",
+            "database",
+            "transaction",
+            "locking",
+            "backend",
+            "frontend",
+            "api",
+            "code",
+          ];
+
+          if (forbiddenTerms.some((term) => lowerQ.includes(term))) {
+            const hrBank = [
+              "Tell me about yourself.",
+              "Why should we hire you for this job?",
+              "What are your greatest strengths?",
+              "What is one weakness you are actively working to improve?",
+              "Why do you want this job?",
+              "Where do you see yourself in five years?",
+              "What motivates you to perform at your best?",
+              "How do you handle high-pressure situations or tight deadlines?",
+              "Tell me about a significant challenge you faced and how you overcame it.",
+              "Tell me about a time you worked successfully as part of a team.",
+              "How do you handle disagreements or conflicts with colleagues?",
+              "What do you consider your greatest personal or professional achievement?",
+              "Tell me about a mistake you made and what you learned from it.",
+              "How do you prioritize your tasks and manage your time effectively?",
+              "What are your long-term career goals?",
+              "How do you handle constructive criticism or feedback?",
+              "What type of work environment brings out your best performance?",
+              "What makes you a unique and qualified candidate for this position?",
+              "How do you adapt when unexpected changes occur in your workload?",
+              "Why are you looking for a new opportunity at this point in your career?",
+            ];
+            qText = hrBank[currentQuestionIndex % hrBank.length];
+          }
+
+          finalQ = {
+            ...response.question,
+            question: qText,
+            codeSnippet: undefined,
+            options: undefined,
+            questionType: "Text",
+          };
+        }
+
+        setCurrentQuestion(finalQ);
 
         const savedAnswer =
             response.savedAnswer || "";
@@ -667,6 +754,33 @@ export const InterviewScreenPage: React.FC = () => {
       utterance
     );
   };
+
+  /* Auto-speak question when it loads or changes */
+  useEffect(() => {
+    if (currentQuestion?.question && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+
+      const timer = window.setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(currentQuestion.question);
+        utterance.rate = 0.95;
+        utterance.onend = () => setSpeakingText(false);
+        utterance.onerror = () => setSpeakingText(false);
+        setSpeakingText(true);
+        try {
+          window.speechSynthesis.speak(utterance);
+        } catch {
+          setSpeakingText(false);
+        }
+      }, 400);
+
+      return () => {
+        window.clearTimeout(timer);
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+        }
+      };
+    }
+  }, [currentQuestion?.id, currentQuestionIndex]);
 
   const getFinalAnswer = () => {
     if (isMcqQuestion) {
@@ -1045,27 +1159,6 @@ export const InterviewScreenPage: React.FC = () => {
     const finalAnswer =
       getFinalAnswer();
 
-    // If blank, store it as unanswered/skipped
-    if (!finalAnswer && !isCurrentAnswerSaved) {
-      try {
-        await apiService.evaluateAnswer({
-          sessionId,
-          questionId:
-            currentQuestion.id,
-          userAnswer:
-            "[SKIPPED]",
-          timeSpentSeconds:
-            secondsElapsed,
-          evaluate: false,
-        });
-      } catch (requestError) {
-        console.error(
-          "Unable to save unanswered question:",
-          requestError
-        );
-      }
-    }
-
     if (!isLastQuestion) {
       setEvaluation(null);
       setUserAnswer("");
@@ -1156,6 +1249,25 @@ export const InterviewScreenPage: React.FC = () => {
       }
 
       try {
+        if (answeredQuestionIndexes.size === 0) {
+          await apiService.endInterview(
+            sessionId,
+            "Finished without answers",
+            "Session finished without submitting answers."
+          );
+
+          sessionStorage.removeItem(
+            `interview-options-${sessionId}`
+          );
+
+          localStorage.removeItem(
+            `interview-end-time-${sessionId}`
+          );
+
+          navigate("/dashboard");
+          return;
+        }
+
         const response =
           await apiService.finishInterview(
             sessionId
@@ -1169,9 +1281,9 @@ export const InterviewScreenPage: React.FC = () => {
           `interview-end-time-${sessionId}`
         );
 
-      navigate(
+        navigate(
           `/result/${response.report.id}`
-      );
+        );
 
       } catch (requestError) {
         console.error(
@@ -1207,7 +1319,7 @@ export const InterviewScreenPage: React.FC = () => {
       setError("");
 
       try {
-        await apiService.endInterview(
+        const res = await apiService.endInterview(
           sessionId,
           endReason,
           endNote
@@ -1221,7 +1333,11 @@ export const InterviewScreenPage: React.FC = () => {
           `interview-end-time-${sessionId}`
         );
 
-        navigate("/dashboard");
+        if (answeredQuestionIndexes.size > 0 || res.has_answers) {
+          navigate(`/result/${sessionId}`);
+        } else {
+          navigate("/dashboard");
+        }
       } catch (requestError) {
         setError(
           getApiError(
@@ -1263,70 +1379,60 @@ export const InterviewScreenPage: React.FC = () => {
         );
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-gradient-to-b from-[#090714] via-[#0B0A1A] to-[#040309] text-slate-100 flex flex-col font-sans relative overflow-x-hidden">
+      {/* Background Ambient Orbs */}
+      <div className="fixed top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Header */}
-      <header className="px-3 sm:px-4 md:px-6 py-3 border-b border-slate-800 bg-[#0F0F12]/90 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-3 sticky top-0 z-30">
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
-            <Sparkles className="w-4 h-4" />
+      <header className="px-4 sm:px-6 md:px-8 py-3.5 border-b-2 border-indigo-500/30 bg-gradient-to-r from-slate-950/95 via-indigo-950/90 to-purple-950/95 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-3 sticky top-0 z-40 shadow-2xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/40 shrink-0">
+            <Sparkles className="w-5 h-5 text-white animate-pulse" />
           </div>
 
           <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              Mock Interview Session
+            <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2.5">
+              <span>{sessionMode === "language-qa" ? "Language Q&A Challenge" : "1-on-1 AI Interview Session"}</span>
 
-              <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] uppercase font-bold border border-indigo-500/30">
-                Live
+              <span className="px-3 py-0.5 rounded-full bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-cyan-300 text-[10px] uppercase font-black tracking-widest border border-cyan-400/40 shadow-sm">
+                {sessionMode === "language-qa" ? "Mode 2 • Technical Q&A" : "Mode 1 • Real Recruiter"}
               </span>
             </h2>
 
-            <p className="text-[11px] text-slate-400">
-              Question{" "}
-              {currentQuestionIndex + 1}{" "}
-              of {totalQuestions}
+            <p className="text-xs font-bold text-indigo-300/80 mt-0.5">
+              Question <span className="text-white font-black">{currentQuestionIndex + 1}</span> of <span className="text-white font-black">{totalQuestions}</span>
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-
           {/* TIME REMAINING */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs text-amber-400 font-mono font-bold">
-            <Clock className="w-4 h-4" />
-
+          <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-950/90 via-slate-900 to-amber-950/90 border border-amber-500/40 text-xs text-amber-300 font-mono font-black shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+            <Clock className="w-4 h-4 text-amber-400 animate-spin-slow" />
             <span>
-              Time Left:{" "}
-              {formatTimer(
-                remainingSeconds
-              )}
+              Time Left: <span className="text-amber-200">{formatTimer(remainingSeconds)}</span>
             </span>
           </div>
 
           {/* CAMERA TOGGLE */}
           <button
             type="button"
-            onClick={() =>
-              setCameraEnabled(
-                (current) =>
-                  !current
-              )
-            }
-            className={`px-3 py-2 rounded-xl border text-xs font-bold transition flex items-center gap-2 ${
+            onClick={() => setCameraEnabled((current) => !current)}
+            className={`px-3.5 py-2 rounded-2xl border-2 text-xs font-black transition-all duration-300 flex items-center gap-2 cursor-pointer transform hover:scale-105 active:scale-95 ${
               cameraEnabled
-                ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
-                : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                ? "bg-emerald-950/80 border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.35)]"
+                : "bg-slate-900/90 border-indigo-500/40 text-slate-200 hover:border-emerald-400/80 hover:text-white shadow-md"
             }`}
           >
             {cameraEnabled ? (
               <>
-                <CameraOff className="w-4 h-4" />
+                <CameraOff className="w-4 h-4 text-emerald-400" />
                 Camera Off
               </>
             ) : (
               <>
-                <Camera className="w-4 h-4" />
+                <Camera className="w-4 h-4 text-emerald-400" />
                 Enable Camera
               </>
             )}
@@ -1335,420 +1441,283 @@ export const InterviewScreenPage: React.FC = () => {
           {/* FULLSCREEN */}
           <button
             type="button"
-            onClick={
-              toggleFullscreen
-            }
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+            onClick={toggleFullscreen}
+            className="p-2.5 rounded-2xl bg-slate-900/90 border-2 border-indigo-500/30 hover:border-indigo-400 text-indigo-300 hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer"
             title="Toggle fullscreen"
           >
-            {isFullscreen ? (
-              <Minimize2 className="w-4 h-4" />
-            ) : (
-              <Maximize2 className="w-4 h-4" />
-            )}
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
 
           {/* END INTERVIEW */}
           <button
             type="button"
-            onClick={() =>
-              setShowEndDialog(true)
-            }
-            className="px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 text-xs font-bold transition"
+            onClick={() => setShowEndDialog(true)}
+            className="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white border border-rose-400/40 text-xs font-black transition-all shadow-[0_0_20px_rgba(244,63,94,0.35)] transform hover:scale-105 active:scale-95 cursor-pointer"
           >
             End Interview
           </button>
         </div>
       </header>
 
-      {/* Progress */}
-      <div className="w-full h-1 bg-slate-800">
+      {/* Progress Line */}
+      <div className="w-full h-1.5 bg-slate-950 overflow-hidden relative">
         <div
-          className="h-full bg-indigo-600 transition-all duration-500"
+          className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 transition-all duration-500 shadow-[0_0_15px_rgba(99,102,241,0.8)]"
           style={{
-            width: `${
-              ((currentQuestionIndex +
-                1) /
-                Math.max(
-                  totalQuestions,
-                  1
-                )) *
-              100
-            }%`,
+            width: `${((currentQuestionIndex + 1) / Math.max(totalQuestions, 1)) * 100}%`,
           }}
         />
       </div>
 
       {error && (
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 pt-5">
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-
-            <p className="text-sm font-semibold">
-              {error}
-            </p>
+          <div className="p-4 rounded-2xl bg-rose-950/80 border-2 border-rose-500/50 text-rose-300 flex items-start gap-3 shadow-xl">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-400" />
+            <p className="text-sm font-black">{error}</p>
           </div>
         </div>
       )}
 
-      <main className="max-w-7xl w-full mx-auto p-3 sm:p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 flex-1">
+      <main className="max-w-7xl w-full mx-auto p-4 sm:p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 sm:gap-6 flex-1 relative z-10">
+        {/* LEFT COLUMN */}
+        <div className="md:col-span-1 lg:col-span-5 flex flex-col gap-5 sm:gap-6">
+          <div className="transform transition-all duration-500 hover:-translate-y-1.5 hover:scale-[1.01]">
+            <CameraPreview enabled={cameraEnabled} />
+          </div>
 
-        {/* LEFT */}
-         <div className="md:col-span-1 lg:col-span-5 flex flex-col gap-4 sm:gap-6">
-
-          <CameraPreview
-            enabled={
-              cameraEnabled
-            }
-          />
-
-          {preferredLanguages.length >
-            0 && (
-            <div className="bg-[#15151A] border border-slate-800 rounded-2xl p-4">
-
-              <p className="text-[10px] uppercase tracking-wider font-bold text-slate-500">
+          {sessionMode === "language-qa" && preferredLanguages.length > 0 && (
+            <div className="bg-gradient-to-br from-indigo-950/90 via-slate-900/95 to-purple-950/90 border-2 border-indigo-500/40 rounded-3xl p-5 shadow-2xl backdrop-blur-xl transform transition-all duration-500 hover:-translate-y-1.5 hover:scale-[1.01] hover:border-indigo-400/80 hover:shadow-[0_20px_40px_rgba(99,102,241,0.3)]">
+              <p className="text-xs font-black uppercase tracking-wider text-indigo-300 mb-2.5 flex items-center gap-2">
+                <Code2 className="w-4 h-4 text-cyan-400" />
                 Preferred Languages
               </p>
 
-              <div className="flex flex-wrap gap-2 mt-2">
-
-                {preferredLanguages.map(
-                  (
-                    language,
-                    index
-                  ) => (
-                    <span
-                      key={`${language}-${index}`}
-                      className={`px-3 py-1.5 rounded-xl border text-xs font-bold ${
-                        index === 0
-                          ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-300"
-                          : "bg-slate-800 border-slate-700 text-slate-300"
-                      }`}
-                    >
-                      {index === 0
-                        ? `${language} • Primary`
-                        : language}
-                    </span>
-                  )
-                )}
-
+              <div className="flex flex-wrap gap-2.5">
+                {preferredLanguages.map((language, index) => (
+                  <span
+                    key={`${language}-${index}`}
+                    className={`px-3.5 py-2 rounded-2xl border-2 text-xs font-black transition-all ${
+                      index === 0
+                        ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 text-white border-cyan-300 shadow-md shadow-indigo-500/30"
+                        : "bg-slate-900/80 border-slate-700 text-slate-200"
+                    }`}
+                  >
+                    {index === 0 ? `${language} • Primary` : language}
+                  </span>
+                ))}
               </div>
             </div>
           )}
 
-          {/* QUESTION */}
-          <div className="bg-[#15151A] border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col gap-4">
+          {/* 1-ON-1 INTERVIEW QUESTION STAGE */}
+          <div className="bg-gradient-to-br from-indigo-950/90 via-slate-900/95 to-purple-950/90 border-2 border-indigo-500/40 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex flex-col gap-5 relative overflow-hidden group transform transition-all duration-500 hover:-translate-y-1.5 hover:scale-[1.01] hover:border-indigo-400/80 hover:shadow-[0_25px_50px_rgba(99,102,241,0.35)]">
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/35 transition-all duration-500 pointer-events-none" />
 
-            <div className="flex items-center justify-between gap-3">
+            {/* AI Speech Bubble / Dialogue Question Card */}
+            <div className="p-5 rounded-2xl bg-slate-950/80 border-2 border-indigo-500/30 flex flex-col gap-4 relative z-10 shadow-inner">
+              <div className="flex flex-row items-center justify-between gap-2 w-full">
+                <span className="text-[11px] sm:text-xs font-black text-cyan-300 uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap shrink-0 bg-gradient-to-r from-indigo-500/30 to-purple-500/30 px-3 py-1.5 rounded-full border border-cyan-400/40 shadow-sm">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
+                  <span>Question #{currentQuestionIndex + 1} of {totalQuestions}</span>
+                </span>
 
-              <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-
-                Question #
-                {currentQuestionIndex + 1}
-              </span>
-
-              <button
-                type="button"
-                onClick={
-                  handleSpeakQuestion
-                }
-                disabled={
-                  isGeneratingQuestion ||
-                  !currentQuestion
-                }
-                className={`p-2 rounded-xl ${
-                  speakingText
-                    ? "bg-indigo-600"
-                    : "bg-slate-800"
-                }`}
-              >
-                <Volume2 className="w-4 h-4" />
-              </button>
-
-            </div>
-
-            {currentQuestion?.questionType && (
-              <span className="self-start px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-[10px] font-bold uppercase">
-                {currentQuestion.questionType}
-              </span>
-            )}
-
-            {isGeneratingQuestion ? (
-              <div className="py-10 flex flex-col items-center gap-3">
-
-                <span className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-
-                <p className="text-xs text-slate-400">
-                  AI is generating your question...
-                </p>
-
+                <button
+                  type="button"
+                  onClick={handleSpeakQuestion}
+                  disabled={isGeneratingQuestion || !currentQuestion}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-black whitespace-nowrap shrink-0 transition-all duration-300 cursor-pointer transform hover:scale-105 active:scale-95 ${
+                    speakingText
+                      ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md shadow-rose-500/40 border border-rose-300/40"
+                      : "bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 text-white shadow-md shadow-indigo-500/30 border border-cyan-300/30"
+                  }`}
+                  title="Voice synthesis out loud"
+                >
+                  <Volume2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>{speakingText ? "Stop Voice" : "Ask Out Loud"}</span>
+                </button>
               </div>
-            ) : currentQuestion ? (
 
-              <p className="text-sm sm:text-base font-semibold leading-relaxed">
-                “
-                {currentQuestion.question}
-                ”
-              </p>
+              {currentQuestion?.questionType && (
+                <span className="self-start px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-xs font-black text-indigo-300 uppercase tracking-wider">
+                  {currentQuestion.questionType} Challenge
+                </span>
+              )}
 
-            ) : (
+              {isGeneratingQuestion ? (
+                <div className="py-8 flex flex-col items-center gap-3">
+                  <span className="w-8 h-8 border-3 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-xs text-indigo-200 font-extrabold">
+                    {interviewerAvatar === "aria" ? "Aria" : "Ren"} is preparing your next interview question...
+                  </p>
+                </div>
+              ) : currentQuestion ? (
+                <div className="relative pl-4 border-l-4 border-indigo-400 py-1 bg-indigo-950/40 rounded-r-2xl border border-indigo-500/20 p-4">
+                  <p className="text-base sm:text-lg font-black leading-relaxed text-white">
+                    “{currentQuestion.question}”
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400 font-bold">
+                  Question could not be loaded.
+                </p>
+              )}
 
-              <p className="text-sm text-slate-400">
-                Question could not be loaded.
-              </p>
-
-            )}
-
-            {currentQuestion
-              ?.idealKeyPoints &&
-              currentQuestion
-                .idealKeyPoints.length >
-                0 && (
-
-                <div className="pt-3 border-t border-slate-800">
-
+              {currentQuestion?.idealKeyPoints && currentQuestion.idealKeyPoints.length > 0 && (
+                <div className="pt-3 border-t border-indigo-500/20">
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowHint(
-                        (current) =>
-                          !current
-                      )
-                    }
-                    className="text-xs text-indigo-400 flex items-center gap-1"
+                    onClick={() => setShowHint((current) => !current)}
+                    className="text-xs text-cyan-300 hover:text-white font-black flex items-center gap-2 cursor-pointer transition-colors"
                   >
-                    <Lightbulb className="w-4 h-4" />
-
-                    {showHint
-                      ? "Hide Hint"
-                      : "Show Hint"}
+                    <Lightbulb className="w-4 h-4 text-amber-400" />
+                    {showHint ? "Hide Evaluator Hint" : "Show Evaluator Hint"}
                   </button>
 
                   {showHint && (
-                    <ul className="mt-3 text-xs text-slate-400 list-disc list-inside">
-                      {currentQuestion
-                        .idealKeyPoints.map(
-                          (
-                            point,
-                            index
-                          ) => (
-                            <li
-                              key={index}
-                            >
-                              {point}
-                            </li>
-                          )
-                        )}
+                    <ul className="mt-3 text-xs text-indigo-100 font-semibold space-y-1.5 pl-4 list-disc bg-indigo-950/60 p-3 rounded-xl border border-indigo-500/30">
+                      {currentQuestion.idealKeyPoints.map((point, index) => (
+                        <li key={index}>{point}</li>
+                      ))}
                     </ul>
                   )}
-
                 </div>
               )}
-
+            </div>
           </div>
         </div>
 
-        {/* RIGHT */}
-        <div className="md:col-span-1 lg:col-span-7 flex flex-col gap-4 sm:gap-6">
+        {/* RIGHT COLUMN */}
+        <div className="md:col-span-1 lg:col-span-7 flex flex-col gap-5 sm:gap-6">
+          <div className="bg-gradient-to-br from-purple-950/90 via-slate-900/95 to-indigo-950/90 border-2 border-purple-500/40 rounded-3xl p-6 sm:p-7 shadow-2xl backdrop-blur-xl flex flex-col gap-6 relative overflow-hidden group transform transition-all duration-500 hover:-translate-y-1.5 hover:scale-[1.01] hover:border-purple-400/80 hover:shadow-[0_25px_60px_rgba(168,85,247,0.35)]">
+            {/* Glowing Background Orbs */}
+            <div className="absolute -top-16 -right-16 w-48 h-48 bg-fuchsia-500/20 rounded-full blur-3xl group-hover:bg-fuchsia-500/30 transition-all duration-500 pointer-events-none" />
 
-          <div className="bg-[#15151A] border border-slate-800 rounded-3xl p-6 flex flex-col gap-5">
-
-            <div className="flex items-center justify-between">
-
-              <h3 className="text-sm font-bold">
+            <div className="flex items-center justify-between relative z-10 border-b border-purple-500/20 pb-4">
+              <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
                 Candidate Answer
               </h3>
 
               {!isMcqQuestion && (
                 <VoiceRecorder
-                  currentValue={
-                    userAnswer
-                  }
-                  onTranscriptChange={
-                    setUserAnswer
-                  }
+                  currentValue={userAnswer}
+                  onTranscriptChange={setUserAnswer}
                 />
               )}
             </div>
 
-            {isMcqQuestion &&
-            currentQuestion?.options ? (
-
-              <div className="space-y-3">
-
-                {currentQuestion.options.map(
-                  (
-                    option,
-                    index
-                  ) => (
-                    <button
-                      type="button"
-                      key={index}
-                      onClick={() =>
-                        setSelectedOption(
-                          option
-                        )
-                      }
-                      className="w-full p-4 rounded-xl bg-slate-950 border border-slate-800 text-left"
-                    >
-                      {String.fromCharCode(
-                        65 + index
-                      )}
-                      . {option}
-                    </button>
-                  )
-                )}
-
+            {isMcqQuestion && currentQuestion?.options ? (
+              <div className="space-y-3.5 relative z-10">
+                {currentQuestion.options.map((option, index) => (
+                  <button
+                    type="button"
+                    key={index}
+                    onClick={() => setSelectedOption(option)}
+                    className={`w-full p-4 rounded-2xl border-2 text-left font-black transition-all duration-200 cursor-pointer transform hover:-translate-y-1 hover:scale-[1.01] ${
+                      selectedOption === option
+                        ? "bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white border-fuchsia-300 shadow-lg shadow-purple-500/40 ring-2 ring-fuchsia-400/50"
+                        : "bg-slate-950/80 text-slate-200 border-purple-500/30 hover:border-purple-400/80 hover:bg-purple-950/40"
+                    }`}
+                  >
+                    <span className="inline-block w-7 h-7 rounded-xl bg-purple-500/20 border border-purple-400/30 text-center leading-7 mr-3 text-fuchsia-300">
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    {option}
+                  </button>
+                ))}
               </div>
-
             ) : (
-
               <textarea
                 rows={16}
                 value={userAnswer}
-                onChange={(event) =>
-                  setUserAnswer(
-                    event.target.value
-                  )
-                }
-                disabled={
-                  Boolean(
-                    evaluation
-                  )
-                }
+                onChange={(event) => setUserAnswer(event.target.value)}
+                disabled={Boolean(evaluation)}
                 placeholder="Type or speak your answer here..."
-                className="w-full p-3 sm:p-4 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-500 outline-none min-h-[260px] sm:min-h-[320px] md:min-h-[360px] lg:min-h-[420px] resize-y"
+                className="w-full p-4.5 rounded-2xl bg-slate-950/90 border-2 border-purple-500/30 focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/40 text-white placeholder:text-slate-500 outline-none min-h-[260px] sm:min-h-[320px] md:min-h-[360px] lg:min-h-[420px] resize-y font-bold text-sm sm:text-base leading-relaxed relative z-10 transition-all shadow-inner"
               />
-
             )}
 
-            {isProgrammingQuestion &&
-              currentQuestion?.codeSnippet && (
-
+            {isProgrammingQuestion && currentQuestion?.codeSnippet && (
+              <div className="relative z-10">
                 <CodeEditor
-                  initialCode={
-                    currentQuestion.codeSnippet
-                  }
-                  onCodeChange={
-                    setCodeAnswer
-                  }
+                  initialCode={currentQuestion.codeSnippet}
+                  onCodeChange={setCodeAnswer}
                 />
+              </div>
+            )}
 
-              )}
-
-              <div className="flex flex-col gap-3">
-
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-
-                  <button
-                    type="button"
-                    onClick={handlePrevious}
-                    disabled={
-                      currentQuestionIndex === 0 ||
-                      isSubmitting ||
-                      isEvaluating
-                    }
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 disabled:opacity-40"
-                  >
-                    <ChevronLeft className="inline w-4 h-4 mr-1" />
-                    Previous
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={
-                      isLastQuestion ||
-                      isSubmitting ||
-                      isEvaluating
-                    }
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40"
-                  >
-                    Next Question
-                    <ChevronRight className="inline w-4 h-4 ml-1" />
-                  </button>
-
-                </div>
-
-                <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3 sm:items-center">
+            <div className="flex flex-col gap-4 relative z-10 pt-2 border-t border-purple-500/20">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={handlePrevious}
+                  disabled={currentQuestionIndex === 0 || isSubmitting || isEvaluating}
+                  className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-900 border border-slate-700 text-white text-xs font-black disabled:opacity-40 hover:bg-slate-800 cursor-pointer transform hover:-translate-y-0.5 active:scale-95 transition-all shadow-md"
+                >
+                  <ChevronLeft className="inline w-4 h-4 mr-1 text-purple-400" />
+                  Previous
+                </button>
 
                 <button
                   type="button"
-                  onClick={() => handleEvaluateAnswer()}
-                  disabled={
-                    !answerAvailable ||
-                    isSubmitting ||
-                    isEvaluating ||
-                    Boolean(evaluation)
-                  }
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold disabled:opacity-40"
+                  onClick={handleNext}
+                  disabled={isLastQuestion || isSubmitting || isEvaluating}
+                  className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-900 border border-purple-500/40 text-white text-xs font-black disabled:opacity-40 hover:bg-purple-950/50 hover:border-purple-400 cursor-pointer transform hover:-translate-y-0.5 active:scale-95 transition-all shadow-md"
                 >
-                  {isEvaluating
-                    ? "Evaluating..."
-                    : "Evaluate Answer"}
+                  Next Question
+                  <ChevronRight className="inline w-4 h-4 ml-1 text-fuchsia-400" />
+                </button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:items-center">
+                <button
+                  type="button"
+                  onClick={() => handleEvaluateAnswer()}
+                  disabled={!answerAvailable || isSubmitting || isEvaluating || Boolean(evaluation)}
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-sm font-black disabled:opacity-40 shadow-lg shadow-emerald-500/30 border border-emerald-400/40 cursor-pointer transform hover:-translate-y-1 hover:scale-105 active:scale-95 transition-all"
+                >
+                  {isEvaluating ? "Evaluating..." : "Evaluate Answer"}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleSubmitAnswer()}
-                  disabled={
-                    !answerAvailable ||
-                    isSubmitting ||
-                    isEvaluating ||
-                    Boolean(evaluation)
-                  }
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold disabled:opacity-40"
+                  disabled={!answerAvailable || isSubmitting || isEvaluating || Boolean(evaluation)}
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 hover:from-indigo-500 hover:via-purple-500 hover:to-fuchsia-500 text-white text-sm font-black disabled:opacity-40 shadow-xl shadow-purple-500/40 border border-indigo-400/40 cursor-pointer transform hover:-translate-y-1 hover:scale-105 active:scale-95 transition-all"
                 >
-                  <Send className="inline w-4 h-4 mr-1.5" />
-
-                  {isSubmitting
-                    ? "Submitting..."
-                    : "Submit Answer"}
+                  <Send className="inline w-4 h-4 mr-2" />
+                  {isSubmitting ? "Submitting..." : "Submit Answer"}
                 </button>
-
               </div>
-
             </div>
           </div>
 
-          {/* Evaluation */}
+          {/* AI Evaluation Card */}
           {evaluation && (
-
-            <div className="bg-[#15151A] border border-indigo-500/40 rounded-3xl p-6 flex flex-col gap-4">
-
-              <div className="flex justify-between">
-
-                <div className="flex gap-2 items-center">
-                  <Award className="w-5 h-5 text-indigo-400" />
-
-                  <h4 className="font-bold">
-                    AI Evaluation and Feedback
+            <div className="bg-gradient-to-br from-indigo-950/95 via-purple-950/95 to-slate-900/95 border-2 border-indigo-400/60 rounded-3xl p-6 sm:p-7 flex flex-col gap-5 shadow-2xl backdrop-blur-xl transform transition-all duration-300 hover:-translate-y-1">
+              <div className="flex justify-between items-center border-b border-indigo-500/30 pb-3">
+                <div className="flex gap-3 items-center">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-500/30 border border-indigo-400/50 flex items-center justify-center">
+                    <Award className="w-5 h-5 text-cyan-300" />
+                  </div>
+                  <h4 className="font-black text-base text-white">
+                    AI Evaluation & Feedback
                   </h4>
                 </div>
 
-                <ScoreBadge
-                  score={
-                    evaluation.score ??
-                    0
-                  }
-                  size="md"
-                />
-
+                <ScoreBadge score={evaluation.score ?? 0} size="md" />
               </div>
 
               {evaluation.feedback && (
-                <div className="p-4 bg-slate-950 rounded-xl">
+                <div className="p-4 bg-slate-950/90 rounded-2xl border border-indigo-500/30 text-slate-200 text-sm font-semibold leading-relaxed">
                   {evaluation.feedback}
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
                 {!isLastQuestion && (
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-indigo-300 font-extrabold">
                     Moving to next question in{" "}
-                    <span className="font-bold text-indigo-400">
+                    <span className="font-black text-cyan-300 bg-indigo-500/30 px-2 py-0.5 rounded-full border border-cyan-400/40">
                       {nextQuestionCountdown}s
                     </span>
                   </p>
@@ -1757,46 +1726,39 @@ export const InterviewScreenPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-3 rounded-xl bg-emerald-600"
+                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white font-black text-sm shadow-lg shadow-emerald-500/30 border border-emerald-300/40 cursor-pointer transform hover:scale-105 active:scale-95 transition-all"
                 >
-                  {isLastQuestion
-                    ? "Finish and View Report"
-                    : "Proceed to Next Question"}
-
-                  <ChevronRight className="inline ml-2 w-4 h-4" />
+                  {isLastQuestion ? "Finish & View Detailed Report" : "Proceed to Next Question"}
                 </button>
-
               </div>
-
             </div>
           )}
-
         </div>
       </main>
 
-      {/* END INTERVIEW DIALOG */}
-        
       {/* UNANSWERED QUESTIONS DIALOG */}
       {showUnansweredDialog && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-[#15151A] border border-slate-700 rounded-3xl p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-gradient-to-br from-slate-950 via-purple-950 to-indigo-950 border-2 border-amber-500/50 rounded-3xl p-7 shadow-2xl relative overflow-hidden group transform transition-all duration-300">
+            {/* Background Glow */}
+            <div className="absolute -top-12 -right-12 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
 
-            <h3 className="text-xl font-bold text-white">
+            <h3 className="text-xl font-black text-white relative z-10 flex items-center gap-2">
               Unanswered Questions
             </h3>
 
-            <p className="text-sm text-slate-400 mt-3">
+            <p className="text-xs font-semibold text-amber-200/90 mt-2 relative z-10">
               You have not answered{" "}
-              {unansweredQuestions
-                .map((number) => `Question ${number}`)
-                .join(", ")}.
+              <span className="text-white font-black">
+                {unansweredQuestions.map((number) => `Question ${number}`).join(", ")}
+              </span>.
             </p>
 
-            <p className="text-sm text-slate-400 mt-2">
+            <p className="text-xs font-medium text-slate-300 mt-2 relative z-10">
               Do you want to go back and answer them, or continue without answering?
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6 relative z-10">
               <button
                 type="button"
                 onClick={() => {
@@ -1809,12 +1771,10 @@ export const InterviewScreenPage: React.FC = () => {
                   setError("");
 
                   if (unansweredQuestions.length > 0) {
-                    setCurrentQuestionIndex(
-                      unansweredQuestions[0] - 1
-                    );
+                    setCurrentQuestionIndex(unansweredQuestions[0] - 1);
                   }
                 }}
-                className="flex-1 px-4 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold"
+                className="flex-1 py-3 px-4 rounded-2xl bg-slate-900 border border-slate-700 hover:bg-slate-800 text-white text-xs font-black transition-all cursor-pointer transform hover:-translate-y-0.5"
               >
                 Go Back & Answer
               </button>
@@ -1832,115 +1792,81 @@ export const InterviewScreenPage: React.FC = () => {
 
                   setPendingFinalAction(null);
                 }}
-                className="flex-1 px-4 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold"
+                className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white text-xs font-black shadow-lg shadow-amber-500/30 border border-amber-400/40 transition-all cursor-pointer transform hover:-translate-y-0.5 active:scale-95"
               >
                 Continue Without Answering
               </button>
             </div>
-
           </div>
         </div>
       )}
 
       {showEndDialog && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-gradient-to-br from-slate-950 via-purple-950 to-indigo-950 border-2 border-rose-500/50 rounded-3xl p-7 shadow-2xl relative overflow-hidden group transform transition-all duration-300">
+            {/* Background Glow */}
+            <div className="absolute -top-12 -right-12 w-40 h-40 bg-rose-500/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-
-          <div className="w-full max-w-md bg-[#15151A] border border-slate-700 rounded-3xl p-6 shadow-2xl">
-
-            <h3 className="text-xl font-bold">
-              End Interview?
+            <h3 className="text-xl font-black text-white flex items-center gap-2 relative z-10">
+              End Interview Early?
             </h3>
 
-            <p className="text-sm text-slate-400 mt-2">
-              Tell us why you want to end this interview.
+            <p className="text-xs font-semibold text-rose-200/80 mt-1.5 relative z-10">
+              Please tell us why you want to end this session early.
             </p>
 
             <select
-              value={
-                endReason
-              }
-              onChange={(event) =>
-                setEndReason(
-                  event.target.value
-                )
-              }
-              className="w-full mt-5 p-3 bg-slate-900 border border-slate-700 rounded-xl"
+              value={endReason}
+              onChange={(event) => setEndReason(event.target.value)}
+              className="w-full mt-5 p-3.5 bg-slate-900/90 border-2 border-purple-500/30 focus:border-rose-400 focus:ring-2 focus:ring-rose-400/40 rounded-2xl text-white text-xs font-bold outline-none cursor-pointer relative z-10"
             >
-              <option value="">
-                Select reason
+              <option value="" className="bg-slate-900 text-slate-400">
+                Select reason for leaving
               </option>
-
-              <option value="Just testing">
+              <option value="Just testing" className="bg-slate-900 text-white font-bold">
                 Just testing the interview
               </option>
-
-              <option value="Not interested">
+              <option value="Not interested" className="bg-slate-900 text-white font-bold">
                 Not interested anymore
               </option>
-
-              <option value="Technical issue">
+              <option value="Technical issue" className="bg-slate-900 text-white font-bold">
                 Technical issue
               </option>
-
-              <option value="Need more preparation">
+              <option value="Need more preparation" className="bg-slate-900 text-white font-bold">
                 Need more preparation
               </option>
-
-              <option value="Other">
+              <option value="Other" className="bg-slate-900 text-white font-bold">
                 Something else
               </option>
             </select>
 
             {endReason === "Other" && (
-
               <textarea
-                value={
-                  endNote
-                }
-                onChange={(event) =>
-                  setEndNote(
-                    event.target.value
-                  )
-                }
+                value={endNote}
+                onChange={(event) => setEndNote(event.target.value)}
                 placeholder="Tell us the reason..."
-                className="w-full mt-3 p-3 rounded-xl bg-slate-900 border border-slate-700"
+                className="w-full mt-3.5 p-3.5 rounded-2xl bg-slate-900/90 border-2 border-purple-500/30 focus:border-rose-400 text-white text-xs font-semibold outline-none relative z-10"
               />
-
             )}
 
-            <div className="flex gap-3 mt-6">
-
+            <div className="flex gap-3 mt-6 relative z-10">
               <button
                 type="button"
-                onClick={() =>
-                  setShowEndDialog(
-                    false
-                  )
-                }
-                className="flex-1 p-3 rounded-xl bg-slate-800"
+                onClick={() => setShowEndDialog(false)}
+                className="flex-1 py-3.5 px-4 rounded-2xl bg-slate-900 border border-slate-700 hover:bg-slate-800 text-slate-200 text-xs font-black transition-all cursor-pointer transform hover:-translate-y-0.5"
               >
                 Continue Interview
               </button>
 
               <button
                 type="button"
-                disabled={
-                  !endReason ||
-                  isEndingEarly
-                }
-                onClick={
-                  handleEndEarly
-                }
-                className="flex-1 p-3 rounded-xl bg-rose-600 text-white disabled:opacity-40"
+                disabled={!endReason || isEndingEarly}
+                onClick={handleEndEarly}
+                className="flex-1 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-black shadow-lg shadow-rose-500/30 border border-rose-400/40 disabled:opacity-40 transition-all cursor-pointer transform hover:-translate-y-0.5 active:scale-95"
               >
-                {isEndingEarly
-                  ? "Ending..."
-                  : "End Interview"}
+                {isEndingEarly ? "Ending..." : "End Interview"}
               </button>
-
             </div>
-
           </div>
         </div>
       )}

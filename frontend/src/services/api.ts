@@ -13,7 +13,6 @@ import {
 const DJANGO_API =
   "https://ai-interview-simulator-docker.onrender.com/api";
 
-console.log("DJANGO_API =", DJANGO_API);
 
 const getToken = (): string | null => {
   return (
@@ -449,6 +448,7 @@ async submitInterviewFeedback(
     totalQuestions: number;
     cameraEnabled: boolean;
     preferredLanguages: string[];
+    mode?: string;
   }): Promise<{ session: InterviewSession }> {
 
   // Step 1: Generate questions and create session
@@ -459,6 +459,7 @@ async submitInterviewFeedback(
       headers: getHeaders(),
       
       body: JSON.stringify({
+        mode: data.mode,
         interview_type: data.type,
         difficulty: data.difficulty,
         total_questions: data.totalQuestions,
@@ -478,23 +479,6 @@ async submitInterviewFeedback(
   }>(
     generateResponse,
     "Failed to generate interview."
-  );
-
-  // Step 2: Start the created session
-  const startResponse = await fetch(
-    `${DJANGO_API}/interviews/start/`,
-    {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify({
-        session_id: generated.session_id,
-      }),
-    }
-  );
-
-  await parseResponse(
-    startResponse,
-    "Failed to start interview session."
   );
 
   // Convert Django response into frontend format
@@ -823,16 +807,26 @@ async submitInterviewFeedback(
     );
   },
 
-  async getJobRecommendations(): Promise<{
+  async getJobRecommendations(
+    targetRole: string = "Software Engineer",
+    seed: string | number = Date.now()
+  ): Promise<{
     recommendations: {
       title: string;
       category: string;
       reason: string;
+      company?: string;
+      deadline?: string;
     }[];
     total: number;
   }> {
+    const params = new URLSearchParams({
+      role: targetRole,
+      seed: String(seed),
+    });
+
     const response = await fetch(
-      `${DJANGO_API}/resume/job-recommendations/`,
+      `${DJANGO_API}/resume/job-recommendations/?${params.toString()}`,
       {
         method: "GET",
         headers: getHeaders(),

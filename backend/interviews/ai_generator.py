@@ -5,6 +5,60 @@ import random
 from .gemini import client, MODEL_NAME
 
 
+GENERAL_HR_QUESTION_BANK = [
+    "Tell me about yourself.",
+    "Why should we hire you?",
+    "What are your greatest strengths?",
+    "What is one weakness you are actively working to improve?",
+    "Why do you want this job?",
+    "Where do you see yourself in five years?",
+    "What motivates you to perform at your best?",
+    "How do you handle high-pressure situations or tight deadlines?",
+    "Tell me about a significant challenge you faced and how you overcame it.",
+    "Tell me about a time you worked successfully as part of a team.",
+    "How do you handle disagreements or conflicts with colleagues?",
+    "What do you consider your greatest personal or professional achievement?",
+    "Tell me about a mistake you made and what you learned from it.",
+    "How do you prioritize your tasks and manage your time effectively?",
+    "What are your long-term career goals?",
+    "How do you handle constructive criticism or feedback?",
+    "What type of work environment brings out your best performance?",
+    "What makes you a unique and qualified candidate for this position?",
+    "How do you adapt when unexpected changes occur in your workload?",
+    "Why are you looking for a new opportunity at this point in your career?",
+    "Describe a situation where you had to take initiative to complete a task.",
+    "How do you ensure clear and effective communication with team members?",
+    "What steps do you take to stay motivated during repetitive tasks?",
+    "How do you handle working with someone who has a different work style than yours?",
+    "Tell me about a time you had to learn something new quickly.",
+    "What does success look like to you in your daily work?",
+    "How do you maintain focus when dealing with multiple competing priorities?",
+    "Tell me about a time you went above and beyond what was expected of you.",
+    "How do you react when a project plan changes suddenly?",
+    "What qualities do you value most in a leader or supervisor?",
+    "How do you approach solving a problem when you do not have all the information?",
+    "Describe a time you helped a teammate who was struggling with their workload.",
+    "How do you make sure your work is accurate and of high quality?",
+    "What strategy do you use when facing a task you find difficult?",
+    "Tell me about a time you received difficult feedback and how you responded.",
+    "What role do you typically take on when working in a group?",
+    "How do you handle work-related stress outside of work hours?",
+    "What values are most important to you in a workplace culture?",
+    "Tell me about a time you set a professional goal for yourself and achieved it.",
+    "How do you ensure you meet commitments when deadlines are tight?",
+    "What experience has had the biggest impact on your professional growth?",
+    "How do you handle feeling overwhelmed at work?",
+    "Describe a situation where you had to explain a complex topic simply.",
+    "What keeps you engaged and enthusiastic about your work?",
+    "How do you build strong working relationships with new colleagues?",
+    "Tell me about a time you had to adjust to a new team or environment.",
+    "What action do you take when you realize you made an error in your work?",
+    "How do you define effective leadership?",
+    "What do you hope to gain from your next professional experience?",
+    "Do you have any questions for us about the position or workplace?"
+]
+
+
 def generate_questions(
     resume_text,
     interview_type,
@@ -13,9 +67,48 @@ def generate_questions(
     company="General Company",
     role="Software Engineer",
     preferred_languages=None,
+    mode=None,
 ):
     if preferred_languages is None:
         preferred_languages = []
+
+    type_str = str(interview_type).lower()
+    mode_str = str(mode).lower() if mode else ""
+
+    is_general_hr = (
+        mode in ["general_hr", "one-on-one", "1-on-1", "1-to-1"]
+        or mode_str in ["general_hr", "one-on-one", "1-on-1", "1-to-1"]
+        or "1-on-1" in type_str
+        or "1-to-1" in type_str
+        or "hr" in type_str
+        or "general" in type_str
+        or "one-on-one" in type_str
+    )
+
+    if is_general_hr:
+        first_question = "Tell me about yourself."
+        second_question = "Why should we hire you for this job?"
+
+        remaining_pool = [
+            q for q in GENERAL_HR_QUESTION_BANK
+            if q not in [first_question, second_question]
+        ]
+
+        needed = total_questions - 2
+        if needed > 0:
+            others = random.sample(remaining_pool, min(needed, len(remaining_pool)))
+            selected_questions = [first_question, second_question] + others
+        else:
+            selected_questions = [first_question, second_question][:total_questions]
+
+        print("=========================================")
+        print("INTERVIEW MODE: general_hr")
+        print("QUESTION SOURCE: general_hr_question_bank")
+        print(f"QUESTION COUNT: {len(selected_questions)}")
+        print("SELECTED QUESTIONS:", selected_questions)
+        print("=========================================")
+
+        return selected_questions
 
     languages_text = (
         ", ".join(preferred_languages)
@@ -89,19 +182,10 @@ IMPORTANT RULES:
 
 - Generate fresh questions every interview.
 - Do NOT return the exact same common questions repeatedly.
-- Avoid repeatedly asking basic questions such as
-  "difference between list and tuple"
-  unless the interview context genuinely requires it.
 - Questions must match the selected difficulty.
-- Questions must match the candidate's resume, role,
-  company and preferred languages.
-- Do not ask all questions from only one subject.
+- Questions must match the candidate's resume, role, company and preferred languages.
 - Keep questions realistic and interview-oriented.
-- Do not give answers.
-- Do not number the questions.
 - Return ONLY a valid Python list of strings.
-- Do not add markdown.
-- Do not add explanations.
 
 Example format:
 
@@ -158,15 +242,15 @@ Example format:
         return questions[:total_questions]
 
     except Exception as error:
-        print(
-            "QUESTION GENERATION GEMINI ERROR:",
-            repr(error),
-        )
+        print("QUESTION GENERATION GEMINI ERROR:", repr(error))
 
-        return random.sample(
-            fallback_questions,
-            min(total_questions, len(fallback_questions)),
-        )
+        if total_questions <= len(fallback_questions):
+            return random.sample(fallback_questions, total_questions)
+        else:
+            selected = list(fallback_questions)
+            while len(selected) < total_questions:
+                selected.append(random.choice(fallback_questions))
+            return selected[:total_questions]
 
 
 def evaluate_answer(

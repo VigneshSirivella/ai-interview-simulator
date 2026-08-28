@@ -301,10 +301,15 @@ export const VoiceRecorder: React.FC<
         </button>
 
         {isListening && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-xs text-rose-500 font-medium">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-
-            Listening...
+          <div className="flex items-center gap-3 px-3.5 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-xs text-rose-500 font-bold">
+            <div className="flex items-end gap-0.5 h-4">
+              <span className="w-1 bg-rose-500 rounded-full animate-sound-bar-1"></span>
+              <span className="w-1 bg-rose-500 rounded-full animate-sound-bar-2"></span>
+              <span className="w-1 bg-rose-500 rounded-full animate-sound-bar-3"></span>
+              <span className="w-1 bg-rose-500 rounded-full animate-sound-bar-4"></span>
+              <span className="w-1 bg-rose-500 rounded-full animate-sound-bar-5"></span>
+            </div>
+            <span>Listening Live...</span>
           </div>
         )}
 

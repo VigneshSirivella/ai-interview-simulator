@@ -1,23 +1,15 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
-import {
-  Link,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   ArrowRight,
+  CheckCircle2,
   Eye,
   EyeOff,
   Lock,
   Mail,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
   UserPlus,
 } from "lucide-react";
@@ -36,11 +28,8 @@ declare global {
         id: {
           initialize: (options: {
             client_id: string;
-            callback: (
-              response: GoogleCredentialResponse
-            ) => void;
+            callback: (response: GoogleCredentialResponse) => void;
           }) => void;
-
           renderButton: (
             element: HTMLElement,
             options: {
@@ -59,15 +48,192 @@ declare global {
   }
 }
 
+// Ultra-Clear High-Definition SVG Animated Monkey Mascot Component
+interface MonkeyMascotProps {
+  state: "open" | "closed" | "peek";
+}
+
+const MonkeyMascot: React.FC<MonkeyMascotProps> = ({ state }) => {
+  return (
+    <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto flex items-center justify-center filter drop-shadow-xl transition-all duration-300 transform hover:scale-105">
+      {/* Background Ambient Glow */}
+      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500/20 via-purple-500/20 to-pink-500/20 blur-md -z-10" />
+
+      <svg
+        viewBox="0 0 120 120"
+        className="w-full h-full overflow-visible select-none"
+        shapeRendering="geometricPrecision"
+      >
+        <defs>
+          <linearGradient id="monkeyFurGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#B35B29" />
+            <stop offset="50%" stopColor="#8C4118" />
+            <stop offset="100%" stopColor="#5E270A" />
+          </linearGradient>
+
+          <linearGradient id="monkeySnoutGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#FFF0E5" />
+            <stop offset="100%" stopColor="#F8D3B8" />
+          </linearGradient>
+
+          <linearGradient id="monkeyEarInnerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#F8B195" />
+            <stop offset="100%" stopColor="#F67280" />
+          </linearGradient>
+
+          <filter id="monkeyShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#000000" floodOpacity="0.35" />
+          </filter>
+        </defs>
+
+        {/* Outer Ears with Crisp Gradient Inner */}
+        <g filter="url(#monkeyShadow)">
+          {/* Left Ear */}
+          <circle cx="20" cy="46" r="15" fill="url(#monkeyFurGrad)" />
+          <circle cx="20" cy="46" r="9" fill="url(#monkeyEarInnerGrad)" opacity="0.9" />
+
+          {/* Right Ear */}
+          <circle cx="100" cy="46" r="15" fill="url(#monkeyFurGrad)" />
+          <circle cx="100" cy="46" r="9" fill="url(#monkeyEarInnerGrad)" opacity="0.9" />
+        </g>
+
+        {/* Main Head */}
+        <circle cx="60" cy="56" r="38" fill="url(#monkeyFurGrad)" filter="url(#monkeyShadow)" />
+
+        {/* Snout Area */}
+        <path
+          d="M 36 48 C 36 34, 50 34, 60 41 C 70 34, 84 34, 84 48 C 84 68, 76 77, 60 77 C 44 77, 36 68, 36 48 Z"
+          fill="url(#monkeySnoutGrad)"
+          filter="url(#monkeyShadow)"
+        />
+
+        {/* Eyes & Expressions */}
+        <g className="transition-all duration-300">
+          {state === "closed" ? (
+            <>
+              {/* Closed Eyes Curved Arcs */}
+              <path
+                d="M 42 47 Q 49 54 56 47"
+                stroke="#4A1D07"
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
+              />
+              <path
+                d="M 64 47 Q 71 54 78 47"
+                stroke="#4A1D07"
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
+              />
+            </>
+          ) : state === "peek" ? (
+            <>
+              {/* Left Eye Closed, Right Eye Open & Curious */}
+              <path
+                d="M 42 47 Q 49 54 56 47"
+                stroke="#4A1D07"
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
+              />
+              {/* Right Eye */}
+              <circle cx="71" cy="46" r="8.5" fill="#FFFFFF" stroke="#4A1D07" strokeWidth="1.8" />
+              <circle cx="71" cy="46" r="4.2" fill="#0F172A" />
+              <circle cx="73.5" cy="43.5" r="1.8" fill="#FFFFFF" />
+              <circle cx="69" cy="48" r="0.9" fill="#FFFFFF" />
+            </>
+          ) : (
+            <>
+              {/* Both Eyes Wide Open, Clear & Sparkling */}
+              <circle cx="49" cy="46" r="8.5" fill="#FFFFFF" stroke="#4A1D07" strokeWidth="1.8" />
+              <circle cx="49" cy="46" r="4.2" fill="#0F172A" />
+              <circle cx="51.5" cy="43.5" r="1.8" fill="#FFFFFF" />
+              <circle cx="47" cy="48" r="0.9" fill="#FFFFFF" />
+
+              <circle cx="71" cy="46" r="8.5" fill="#FFFFFF" stroke="#4A1D07" strokeWidth="1.8" />
+              <circle cx="71" cy="46" r="4.2" fill="#0F172A" />
+              <circle cx="73.5" cy="43.5" r="1.8" fill="#FFFFFF" />
+              <circle cx="69" cy="48" r="0.9" fill="#FFFFFF" />
+            </>
+          )}
+        </g>
+
+        {/* Crisp Nose */}
+        <ellipse cx="60" cy="58" rx="5" ry="3.8" fill="#4A1D07" />
+
+        {/* Cute Smile */}
+        {state === "closed" ? (
+          <path
+            d="M 53 67 Q 60 71 67 67"
+            stroke="#4A1D07"
+            strokeWidth="3"
+            strokeLinecap="round"
+            fill="none"
+          />
+        ) : state === "peek" ? (
+          <path
+            d="M 52 66 Q 60 74 68 66"
+            stroke="#4A1D07"
+            strokeWidth="3"
+            strokeLinecap="round"
+            fill="none"
+          />
+        ) : (
+          <path
+            d="M 51 65 Q 60 75 69 65"
+            stroke="#4A1D07"
+            strokeWidth="3"
+            strokeLinecap="round"
+            fill="none"
+          />
+        )}
+
+        {/* Rosy Blush Cheeks */}
+        <circle cx="38" cy="58" r="5" fill="#FF6B6B" opacity="0.5" />
+        <circle cx="82" cy="58" r="5" fill="#FF6B6B" opacity="0.5" />
+
+        {/* Paws with Dynamic Transform Animations */}
+        <g
+          className="transition-all duration-300 ease-out origin-bottom-left"
+          style={{
+            transform:
+              state === "closed"
+                ? "translate(17px, -38px) rotate(10deg)"
+                : state === "peek"
+                ? "translate(16px, -38px) rotate(12deg)"
+                : "translate(0px, 0px)",
+          }}
+        >
+          <ellipse cx="30" cy="90" rx="12" ry="15" fill="url(#monkeyFurGrad)" filter="url(#monkeyShadow)" />
+          <ellipse cx="30" cy="90" rx="7.5" ry="10" fill="url(#monkeySnoutGrad)" opacity="0.9" />
+        </g>
+
+        <g
+          className="transition-all duration-300 ease-out origin-bottom-right"
+          style={{
+            transform:
+              state === "closed"
+                ? "translate(-17px, -38px) rotate(-10deg)"
+                : state === "peek"
+                ? "translate(-10px, -22px) rotate(-20deg)"
+                : "translate(0px, 0px)",
+          }}
+        >
+          <ellipse cx="90" cy="90" rx="12" ry="15" fill="url(#monkeyFurGrad)" filter="url(#monkeyShadow)" />
+          <ellipse cx="90" cy="90" rx="7.5" ry="10" fill="url(#monkeySnoutGrad)" opacity="0.9" />
+        </g>
+      </svg>
+    </div>
+  );
+};
+
 export const LoginPage: React.FC = () => {
   const { login, googleLogin } = useAuth();
-
   const navigate = useNavigate();
   const location = useLocation();
 
-  const googleButtonRef =
-    useRef<HTMLDivElement | null>(null);
-
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
   const googleLoginRef = useRef(googleLogin);
 
   useEffect(() => {
@@ -78,38 +244,30 @@ export const LoginPage: React.FC = () => {
     location.search.includes("unregistered=true") ||
     location.search.includes("authRequired=true");
 
-  const passwordResetSuccessful =
-    location.search.includes("reset=success");
-
-  const emailVerified =
-    location.search.includes("verified=true");
+  const passwordResetSuccessful = location.search.includes("reset=success");
+  const emailVerified = location.search.includes("verified=true");
 
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [password, setPassword] =
-    useState("");
-
-  const [rememberMe, setRememberMe] =
-    useState(true);
-
-  const [showPassword, setShowPassword] =
-    useState(false);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const monkeyState: "open" | "closed" | "peek" = isPasswordFocused
+    ? showPassword
+      ? "peek"
+      : "closed"
+    : "open";
 
   useEffect(() => {
-    const clientId =
-      import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
     if (!clientId) {
       console.error(
         "VITE_GOOGLE_CLIENT_ID is missing in the frontend .env file."
       );
-
       return;
     }
 
@@ -118,27 +276,15 @@ export const LoginPage: React.FC = () => {
     let cancelled = false;
 
     const renderGoogleButton = () => {
-      if (cancelled) {
-        return;
-      }
+      if (cancelled) return;
 
-      if (
-        !window.google ||
-        !googleButtonRef.current
-      ) {
+      if (!window.google || !googleButtonRef.current) {
         attempts += 1;
-
         if (attempts < 20) {
-          timeoutId = window.setTimeout(
-            renderGoogleButton,
-            250
-          );
+          timeoutId = window.setTimeout(renderGoogleButton, 250);
         } else {
-          console.error(
-            "Unable to load Google Sign-In."
-          );
+          console.error("Unable to load Google Sign-In script.");
         }
-
         return;
       }
 
@@ -146,15 +292,9 @@ export const LoginPage: React.FC = () => {
 
       window.google.accounts.id.initialize({
         client_id: clientId,
-
-        callback: async (
-          response: GoogleCredentialResponse
-        ) => {
+        callback: async (response: GoogleCredentialResponse) => {
           if (!response.credential) {
-            setErrorMessage(
-              "Google did not return a valid credential."
-            );
-
+            setErrorMessage("Google did not return a valid credential.");
             return;
           }
 
@@ -162,78 +302,51 @@ export const LoginPage: React.FC = () => {
           setLoading(true);
 
           try {
-            const success =
-              await googleLoginRef.current(
-                response.credential
-              );
-
+            const success = await googleLoginRef.current(response.credential);
             if (success) {
               navigate("/dashboard");
               return;
             }
-
-            setErrorMessage(
-              "Google login failed. Please try again."
-            );
+            setErrorMessage("Google login failed. Please try again.");
           } catch (error) {
-            console.error(
-              "Google login error:",
-              error
-            );
-
-            setErrorMessage(
-              "Unable to sign in with Google."
-            );
+            console.error("Google login error:", error);
+            setErrorMessage("Unable to sign in with Google.");
           } finally {
             setLoading(false);
           }
         },
       });
 
-      window.google.accounts.id.renderButton(
-        googleButtonRef.current,
-        {
-          type: "standard",
-          theme: "outline",
-          size: "large",
-          text: "signin_with",
-          shape: "rectangular",
-          logo_alignment: "left",
-          width: 350,
-        }
-      );
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        text: "signin_with",
+        shape: "rectangular",
+        logo_alignment: "left",
+        width: 300,
+      });
     };
 
     renderGoogleButton();
 
     return () => {
       cancelled = true;
-
       if (timeoutId) {
         window.clearTimeout(timeoutId);
       }
     };
   }, [navigate]);
 
-  const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     setErrorMessage("");
     setLoading(true);
 
     try {
-      const success = await login(
-        email.trim().toLowerCase(),
-        password
-      );
+      const success = await login(email.trim().toLowerCase(), password);
 
       if (success) {
-        if (!rememberMe) {
-          // Later, sessionStorage can be used here.
-        }
-
         navigate("/dashboard");
         return;
       }
@@ -243,7 +356,6 @@ export const LoginPage: React.FC = () => {
       );
     } catch (error) {
       console.error("Login error:", error);
-
       setErrorMessage(
         "Unable to login. Please make sure the backend server is running."
       );
@@ -253,226 +365,234 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-3 sm:px-4 py-6 sm:py-10 lg:py-12">
-      <div className="max-w-md w-full bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl relative overflow-hidden">
-        <div className="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+    <div className="min-h-[78vh] flex items-center justify-center px-3 py-4 sm:py-6 relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-1/4 left-1/3 w-[350px] h-[350px] bg-gradient-to-tr from-pink-500/20 via-purple-600/20 to-indigo-500/20 rounded-full blur-[110px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/3 w-[350px] h-[350px] bg-gradient-to-br from-cyan-400/15 via-indigo-600/20 to-fuchsia-600/20 rounded-full blur-[110px] pointer-events-none animate-pulse" />
 
-        <div className="flex flex-col items-center text-center mb-7">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white mb-3 shadow-lg shadow-indigo-500/30">
-            <Sparkles className="w-6 h-6" />
+      {/* Main Single Centered Login Card - Compact Padding & Height */}
+      <div className="w-full max-w-[420px] p-[2px] rounded-3xl bg-gradient-to-r from-pink-500 via-purple-500 via-indigo-500 to-cyan-400 shadow-2xl shadow-purple-500/20 relative z-10">
+        
+        {/* Inner Glass Container */}
+        <div className="w-full bg-white/90 dark:bg-[#12131F]/90 backdrop-blur-2xl rounded-[22px] p-5 sm:p-6 shadow-inner overflow-hidden relative">
+          
+          {/* Top Tag Header */}
+          <div className="flex items-center justify-center mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-[10px] font-extrabold uppercase tracking-wider">
+              <Sparkles className="w-3 h-3" />
+              <span>AI Candidate Portal</span>
+            </div>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
-            Candidate Login
-          </h2>
-
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-            Sign in to access interviews, reports and
-            analytics
-          </p>
-        </div>
-
-        {isAuthenticationRequired && (
-          <div className="mb-5 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30">
-            <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-xs">
-              <ShieldAlert className="w-5 h-5 shrink-0" />
-
-              Authentication required
-            </div>
-
-            <p className="mt-2 text-xs text-rose-700 dark:text-rose-300">
-              Please sign in or create an account before
-              accessing this page.
+          {/* HD Crisp Interactive Monkey Mascot Header */}
+          <div className="mb-3 text-center">
+            <MonkeyMascot state={monkeyState} />
+            <h2 className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-white">
+              Candidate Login
+            </h2>
+            <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+              {monkeyState === "closed"
+                ? "🙈 Password encrypted & protected"
+                : monkeyState === "peek"
+                ? "🐵 Checking your password details"
+                : "Sign in to access your interviews & AI reports"}
             </p>
-
-            <Link
-              to="/register"
-              className="mt-3 py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-center gap-2"
-            >
-              <UserPlus className="w-4 h-4" />
-              Create an account
-            </Link>
-          </div>
-        )}
-
-        {passwordResetSuccessful && (
-          <div className="mb-5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
-            Password changed successfully. You can now log
-            in using your new password.
-          </div>
-        )}
-
-        {emailVerified && (
-          <div className="mb-5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
-            Email verified successfully. Please log in.
-          </div>
-        )}
-
-        {errorMessage && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4"
-        >
-          <div>
-            <label
-              htmlFor="login-email"
-              className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5"
-            >
-              Email Address
-            </label>
-
-            <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-
-              <input
-                id="login-email"
-                type="email"
-                required
-                value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
-                placeholder="candidate@example.com"
-                autoComplete="email"
-                disabled={loading}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-60"
-              />
-            </div>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label
-                htmlFor="login-password"
-                className="text-xs font-bold text-slate-700 dark:text-slate-300"
-              >
-                Password
-              </label>
-
+          {/* Alert Banners */}
+          {isAuthenticationRequired && (
+            <div className="mb-3 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 animate-fadeIn">
+              <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-bold text-xs">
+                <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
+                <span>Authentication required</span>
+              </div>
+              <p className="mt-0.5 text-[11px] text-rose-700 dark:text-rose-300">
+                Please sign in or create an account before accessing this page.
+              </p>
               <Link
-                to="/forgot-password"
-                className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                to="/register"
+                className="mt-2 py-1.5 px-3 rounded-lg bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition"
               >
-                Forgot Password?
+                <UserPlus className="w-3.5 h-3.5" />
+                Create account
               </Link>
             </div>
+          )}
 
-            <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-
-              <input
-                id="login-password"
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
-                }
-                required
-                value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
-                placeholder="Enter your password"
-                autoComplete="current-password"
-                disabled={loading}
-                className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-60"
-              />
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowPassword(
-                    (current) => !current
-                  )
-                }
-                disabled={loading}
-                aria-label={
-                  showPassword
-                    ? "Hide password"
-                    : "Show password"
-                }
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-50"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
-              </button>
+          {passwordResetSuccessful && (
+            <div className="mb-3 p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+              <span>Password changed successfully. Please log in.</span>
             </div>
+          )}
+
+          {emailVerified && (
+            <div className="mb-3 p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+              <span>Email verified successfully! Please log in.</span>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="mb-3 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Email Field */}
+            <div>
+              <label
+                htmlFor="login-email"
+                className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1"
+              >
+                Email Address
+              </label>
+              <div className="relative group">
+                <Mail className="w-3.5 h-3.5 text-slate-400 group-focus-within:text-purple-500 absolute left-3 top-3 transition-colors" />
+                <input
+                  id="login-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  onFocus={() => setIsPasswordFocused(false)}
+                  placeholder="candidate@example.com"
+                  autoComplete="email"
+                  disabled={loading}
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-900/80 text-slate-900 dark:text-white text-xs sm:text-sm focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all disabled:opacity-60 placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label
+                  htmlFor="login-password"
+                  className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300"
+                >
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:text-pink-500 transition-colors"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+              <div className="relative group">
+                <Lock className="w-3.5 h-3.5 text-slate-400 group-focus-within:text-purple-500 absolute left-3 top-3 transition-colors" />
+                <input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => setIsPasswordFocused(false)}
+                  placeholder="••••••••••••"
+                  autoComplete="current-password"
+                  disabled={loading}
+                  className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-900/80 text-slate-900 dark:text-white text-xs sm:text-sm focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all disabled:opacity-60 placeholder:text-slate-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  disabled={loading}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors disabled:opacity-50"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-3.5 h-3.5" />
+                  ) : (
+                    <Eye className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me */}
+            <div className="flex items-center justify-between pt-0.5">
+              <label className="flex items-center gap-1.5 cursor-pointer select-none text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) => setRememberMe(event.target.checked)}
+                  disabled={loading}
+                  className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-700 text-purple-600 focus:ring-purple-500 transition cursor-pointer"
+                />
+                <span>Remember this device</span>
+              </label>
+            </div>
+
+            {/* Primary Gradient CTA Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed group"
+            >
+              {loading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In to Dashboard</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Social Divider */}
+          <div className="my-4 flex items-center gap-2">
+            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">
+              Or continue with
+            </span>
+            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
           </div>
 
-          <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600 dark:text-slate-400">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(event) =>
-                setRememberMe(
-                  event.target.checked
-                )
-              }
-              disabled={loading}
-              className="rounded text-indigo-600 focus:ring-indigo-500"
-            />
-
-            Remember me
-          </label>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          {/* Google OAuth Button */}
+          <div
+            className={
+              loading
+                ? "flex justify-center opacity-50 pointer-events-none"
+                : "flex justify-center"
+            }
           >
-            {loading ? (
-              <>
-                <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              <>
-                Sign In to Dashboard
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
+            <div ref={googleButtonRef} className="w-full flex justify-center min-h-[40px]" />
+          </div>
 
-        <div className="my-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+          {/* Footer Register Link */}
+          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
+            <span>Don&apos;t have an account?</span>
+            <Link
+              to="/register"
+              className="font-extrabold text-purple-600 dark:text-purple-400 hover:text-pink-500 transition-colors flex items-center gap-1"
+            >
+              <span>Create Account</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
 
-          <span className="text-[11px] font-semibold uppercase text-slate-400 whitespace-nowrap">
-            Or continue with
-          </span>
+          {/* Trust Badges */}
+          <div className="mt-3 flex items-center justify-center gap-2.5 text-[9px] text-slate-400 dark:text-slate-500 font-medium">
+            <span className="flex items-center gap-1">
+              <Lock className="w-2.5 h-2.5 text-purple-500" />
+              256-Bit SSL Encrypted
+            </span>
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <ShieldCheck className="w-2.5 h-2.5 text-emerald-500" />
+              SOC-2 Certified
+            </span>
+          </div>
 
-          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
-        </div>
-
-        <div
-          className={
-            loading
-              ? "flex justify-center opacity-50 pointer-events-none"
-              : "flex justify-center"
-          }
-        >
-          <div ref={googleButtonRef} />
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500">
-          Don&apos;t have an account?{" "}
-
-          <Link
-            to="/register"
-            className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-          >
-            Register Candidate Account
-          </Link>
         </div>
       </div>
     </div>

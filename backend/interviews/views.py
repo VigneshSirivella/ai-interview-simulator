@@ -1,19 +1,18 @@
-from urllib import request
-
+import random
+from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-
 from .models import InterviewSession, InterviewAnswer
 from resume.models import Resume
-from .models import InterviewSession
 from .serializers import GenerateInterviewSerializer
 from .ai_generator import (
     generate_questions,
     evaluate_answer,
     evaluate_answers_batch,
     generate_final_report,
+    GENERAL_HR_QUESTION_BANK,
 )
 
 
@@ -27,19 +26,35 @@ def generate_interview(request):
         difficulty = serializer.validated_data["difficulty"]
         total_questions = int(request.data.get("total_questions", 10))
 
-        try:
-            resume = Resume.objects.get(user=request.user)
+        mode = request.data.get("mode")
+        type_str = str(interview_type).lower()
 
-            resume_text = (resume.extracted_text or "")[:8000]
+        is_one_on_one = (
+            mode in ["general_hr", "one-on-one", "1-on-1", "1-to-1"]
+            or "1-on-1" in type_str
+            or "1-to-1" in type_str
+            or "hr" in type_str
+            or "general" in type_str
+            or "one-on-one" in type_str
+        )
 
-        except Resume.DoesNotExist:
+        if is_one_on_one:
             resume_text = ""
+            company = "General"
+            role = "General Candidate"
+            preferred_languages = []
+            interview_mode = "general_hr"
+        else:
+            try:
+                resume = Resume.objects.get(user=request.user)
+                resume_text = (resume.extracted_text or "")[:8000]
+            except Resume.DoesNotExist:
+                resume_text = ""
 
-        company = request.data.get("company", "General Company")
-
-        role = request.data.get("role", "Software Engineer")
-
-        preferred_languages = request.data.get("preferred_languages", [])
+            company = request.data.get("company", "General Company")
+            role = request.data.get("role", "Software Engineer")
+            preferred_languages = request.data.get("preferred_languages", [])
+            interview_mode = "technical"
 
         camera_enabled = request.data.get("camera_enabled", False)
 
@@ -51,6 +66,7 @@ def generate_interview(request):
             company,
             role,
             preferred_languages,
+            mode=interview_mode,
         )
 
         interview = InterviewSession.objects.create(
@@ -74,11 +90,6 @@ def generate_interview(request):
     return Response(serializer.errors, status=400)
 
 
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def start_interview(request):
@@ -95,6 +106,45 @@ def start_interview(request):
             {"error": "Interview session not found"},
             status=404,
         )
+
+    is_one_on_one = (
+        session.company == "General"
+        or "1-on-1" in str(session.interview_type)
+        or "1-to-1" in str(session.interview_type)
+        or "HR" in str(session.interview_type)
+        or "general" in str(session.interview_type).lower()
+        or "one-on-one" in str(session.interview_type).lower()
+    )
+
+    if is_one_on_one:
+        questions_text = " ".join([str(q).lower() for q in session.questions])
+        forbidden = [
+            "foodz",
+            "mysql",
+            "javascript frontend",
+            "python backend",
+            "cart state",
+            "schema",
+            "database",
+            "integration",
+        ]
+        if any(k in questions_text for k in forbidden):
+            first_q = "Tell me about yourself."
+            second_q = "Why should we hire you for this job?"
+            pool = [
+                q for q in GENERAL_HR_QUESTION_BANK if q not in [first_q, second_q]
+            ]
+            count = len(session.questions)
+            needed = count - 2
+            if needed > 0:
+                clean_qs = [first_q, second_q] + random.sample(
+                    pool, min(needed, len(pool))
+                )
+            else:
+                clean_qs = [first_q, second_q][:count]
+
+            session.questions = clean_qs
+            session.save(update_fields=["questions"])
 
     if session.status in ["completed", "ended"]:
         return Response(
@@ -456,9 +506,6 @@ def final_report(request, session_id):
     return Response({"report": report_data})
 
 
-from django.utils import timezone
-
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def end_interview(request):
@@ -477,13 +524,42 @@ def end_interview(request):
             status=404,
         )
 
-    session.status = "ended"
+    answers = session.answers.all().order_by("question_number")
+    if answers.exists():
+        questions_and_answers = [
+            {
+                "question_number": item.question_number,
+                "question": item.question,
+                "answer": item.answer,
+                "score": item.score,
+                "feedback": item.feedback,
+                "strengths": item.strengths,
+                "improvements": item.improvements,
+            }
+            for item in answers
+        ]
+        final_eval = generate_final_report(questions_and_answers)
+        session.score = final_eval.get("overall_score", 0)
+        session.technical_score = final_eval.get("technical_score", 0)
+        session.communication_score = final_eval.get("communication_score", 0)
+        session.feedback = final_eval.get("final_feedback", "")
+        session.strengths = final_eval.get("strengths", [])
+        session.weaknesses = final_eval.get("weaknesses", [])
+        session.improvements = final_eval.get("improvements", [])
+        session.status = "completed"
+    else:
+        session.status = "ended"
+
     session.end_reason = reason
     session.end_note = note
     session.ended_at = timezone.now()
     session.save()
 
-    return Response({"message": "Interview ended successfully"})
+    return Response({
+        "message": "Interview processed successfully",
+        "status": session.status,
+        "has_answers": answers.exists()
+    })
 
 
 @api_view(["POST"])
