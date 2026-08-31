@@ -68,6 +68,7 @@ export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userDropdownRef = React.useRef<HTMLDivElement | null>(null);
 
   const navLinks = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -78,26 +79,81 @@ export const Navbar: React.FC = () => {
     { name: "Leaderboard", path: "/leaderboard", icon: Trophy },
   ];
 
+  // Close dropdown and mobile menu on route navigation
+  useEffect(() => {
+    setUserDropdownOpen(false);
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Outside pointerdown (click/touch) & Escape key listener
+  useEffect(() => {
+    const handleOutsideInteraction = (event: PointerEvent | MouseEvent) => {
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target as Node)
+      ) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setUserDropdownOpen(false);
+        setMobileMenuOpen(false);
+      }
+    };
+
+    if (userDropdownOpen) {
+      document.addEventListener("pointerdown", handleOutsideInteraction);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideInteraction);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [userDropdownOpen]);
+
+  // Mutually exclusive toggle handlers
+  const toggleUserDropdown = () => {
+    setUserDropdownOpen((prev) => {
+      if (!prev) {
+        setMobileMenuOpen(false);
+      }
+      return !prev;
+    });
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((prev) => {
+      if (!prev) {
+        setUserDropdownOpen(false);
+      }
+      return !prev;
+    });
+  };
+
   const handleLogout = () => {
+    setUserDropdownOpen(false);
     logout();
     navigate("/login");
   };
 
   return (
     <header className="sticky top-0 z-40 w-full glass-nav transition-colors">
-      <div className="max-w-7xl w-full mx-auto px-3 sm:px-5 md:px-6 lg:px-8">
+      <div className="max-w-7xl w-full mx-auto px-2.5 sm:px-5 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-              <div className="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 p-[1.5px] shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
-                <div className="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-white">
-                  <Sparkles className="w-5 h-5 text-indigo-400 group-hover:rotate-12 transition-transform" />
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Link to="/" className="flex items-center gap-2 group shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 p-[1.5px] shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+                <div className="w-full h-full bg-slate-900 rounded-[10px] sm:rounded-[14px] flex items-center justify-center text-white">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400 group-hover:rotate-12 transition-transform" />
                 </div>
               </div>
               <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base sm:text-lg font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 dark:from-white dark:via-indigo-200 dark:to-purple-300 bg-clip-text text-transparent tracking-tight whitespace-nowrap">
+                <div className="flex items-center gap-1">
+                  <span className="text-sm sm:text-lg font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 dark:from-white dark:via-indigo-200 dark:to-purple-300 bg-clip-text text-transparent tracking-tight whitespace-nowrap">
                     AI Interview
                   </span>
                 </div>
@@ -106,7 +162,6 @@ export const Navbar: React.FC = () => {
                 </span>
               </div>
             </Link>
-
           </div>
 
           {/* Desktop Nav Links */}
@@ -138,7 +193,7 @@ export const Navbar: React.FC = () => {
             {/* Theme Toggle Pill */}
             <button
               onClick={toggleDarkMode}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:border-indigo-500/50 transition-all shadow-xs cursor-pointer group"
+              className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-full border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:border-indigo-500/50 transition-all shadow-xs cursor-pointer group shrink-0 min-h-[38px]"
               title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isDarkMode ? (
@@ -155,10 +210,10 @@ export const Navbar: React.FC = () => {
             </button>
 
             {isAuthenticated && user ? (
-              <div className="relative">
+              <div ref={userDropdownRef} className="relative">
                 <button
-                  onClick={() => setUserDropdownOpen((prev) => !prev)}
-                  className="flex items-center gap-2 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  onClick={toggleUserDropdown}
+                  className="flex items-center gap-2 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer min-h-[38px]"
                 >
                   <NavbarAvatar user={user} />
                   <span className="hidden sm:inline text-xs font-semibold text-slate-800 dark:text-slate-200 max-w-[100px] truncate">
@@ -195,7 +250,7 @@ export const Navbar: React.FC = () => {
 
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-left border-t border-slate-100 dark:border-slate-800 mt-1"
+                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-left border-t border-slate-100 dark:border-slate-800 mt-1 cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
@@ -223,8 +278,8 @@ export const Navbar: React.FC = () => {
             {/* Mobile Menu Button */}
             {isAuthenticated && (
               <button
-                onClick={() => setMobileMenuOpen((prev) => !prev)}
-                className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                onClick={toggleMobileMenu}
+                className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer min-h-[38px]"
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>

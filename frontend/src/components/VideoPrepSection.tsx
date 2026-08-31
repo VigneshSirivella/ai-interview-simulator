@@ -170,7 +170,7 @@ export const VideoPrepSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-gradient-to-br from-[#070913] via-[#0d0f22] to-[#15122e] border border-purple-500/20 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl flex flex-col gap-8 text-white relative overflow-hidden max-w-7xl mx-auto w-full">
+    <section className="bg-gradient-to-br from-[#070913] via-[#0d0f22] to-[#15122e] border border-purple-500/20 rounded-3xl p-3.5 sm:p-8 lg:p-10 shadow-2xl flex flex-col gap-6 sm:gap-8 text-white relative overflow-hidden max-w-7xl mx-auto w-full">
       {/* Ambient Deep Navy & Purple Glow Effects */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -196,14 +196,14 @@ export const VideoPrepSection: React.FC = () => {
       </div>
 
       {/* Responsive 2-Column Desktop Grid / 1-Column Mobile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 relative z-10 w-full">
         {PREP_VIDEOS.map((video) => {
           const isPlaying = activeVideoId === video.id;
 
           return (
             <div
               key={video.id}
-              className={`p-4 sm:p-5 rounded-3xl bg-gradient-to-br ${video.cardGradient} backdrop-blur-md border transition-all duration-300 flex flex-col justify-start gap-4 shadow-xl ${video.glowShadow} ${
+              className={`p-3.5 sm:p-5 rounded-3xl bg-gradient-to-br ${video.cardGradient} backdrop-blur-md border transition-all duration-300 flex flex-col justify-start gap-4 shadow-xl w-full ${video.glowShadow} ${
                 isPlaying
                   ? video.activeRing
                   : `${video.borderStyle} hover:-translate-y-1.5`

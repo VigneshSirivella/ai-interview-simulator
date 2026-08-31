@@ -14,3 +14,9 @@ __pycache__/
 
 # User uploaded media
 backend/media/
+
+# Local development
+.vscode/
+backend/venv/
+backend/py_packages/
+backend/db.sqlite3

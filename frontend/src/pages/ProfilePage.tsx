@@ -449,35 +449,35 @@ export const ProfilePage: React.FC = () => {
       {/* Preset AI Avatar Selection Modal */}
       {showAvatarModal && (
         <div
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4"
           onClick={() => setShowAvatarModal(false)}
         >
           <div
-            className="relative max-w-2xl w-full flex flex-col bg-[#15151A] border-2 border-indigo-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95"
+            className="relative max-w-2xl w-full max-h-[90vh] overflow-y-auto flex flex-col bg-[#15151A] border-2 border-indigo-500/50 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-indigo-500/30">
+            <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-indigo-500/30">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md">
-                  <Sparkles className="w-5 h-5 text-indigo-200" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shrink-0">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-200" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-white">Select Candidate Avatar</h3>
-                  <p className="text-xs text-indigo-200">Choose a cute character avatar (Clear Monkey 🐒, Panda 🐼, Fox 🦊), upload a custom photo, or leave as default initials.</p>
+                  <h3 className="text-base sm:text-lg font-black text-white">Select Candidate Avatar</h3>
+                  <p className="text-[11px] sm:text-xs text-indigo-200">Choose a cute character avatar (Clear Monkey 🐒, Panda 🐼, Fox 🦊), upload a photo, or use initials.</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAvatarModal(false)}
-                className="w-9 h-9 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center hover:bg-rose-600 hover:text-white transition cursor-pointer"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center hover:bg-rose-600 hover:text-white transition cursor-pointer shrink-0"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
             {/* Preset Avatars Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 py-4 sm:py-6">
               {PRESET_AVATARS.map((av) => {
                 const isSelected = profilePreview === av.url;
                 return (
@@ -493,19 +493,19 @@ export const ProfilePage: React.FC = () => {
                       } catch (err) {}
                       setShowAvatarModal(false);
                     }}
-                    className={`relative p-3 rounded-2xl border flex flex-col items-center gap-2.5 transition-all duration-300 transform hover:scale-105 cursor-pointer ${
+                    className={`relative p-2.5 sm:p-3 rounded-2xl border flex flex-col items-center gap-2 transition-all duration-300 transform hover:scale-105 cursor-pointer ${
                       isSelected
                         ? "border-indigo-400 bg-indigo-500/25 ring-2 ring-indigo-400 shadow-lg shadow-indigo-500/30"
                         : "border-slate-800 bg-slate-900/70 hover:border-indigo-500/50 hover:bg-slate-900"
                     }`}
                   >
-                    <div className={`w-16 h-16 rounded-2xl overflow-hidden p-0.5 bg-gradient-to-tr ${av.theme} shadow-md`}>
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden p-0.5 bg-gradient-to-tr ${av.theme} shadow-md`}>
                       <img src={av.url} alt={av.name} className="w-full h-full object-cover rounded-[14px]" />
                     </div>
-                    <span className="text-xs font-black text-white text-center">{av.name}</span>
+                    <span className="text-[11px] sm:text-xs font-black text-white text-center leading-tight">{av.name}</span>
                     {isSelected && (
-                      <span className="absolute top-2 right-2 p-1 rounded-full bg-emerald-500 text-white shadow-md">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span className="absolute top-1.5 right-1.5 p-0.5 sm:p-1 rounded-full bg-emerald-500 text-white shadow-md">
+                        <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       </span>
                     )}
                   </button>
@@ -514,14 +514,14 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {/* Bottom Alternative Actions */}
-            <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div className="pt-3 sm:pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
               <button
                 type="button"
                 onClick={() => {
                   setShowAvatarModal(false);
                   fileInputRef.current?.click();
                 }}
-                className="px-4 py-2.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-indigo-200 text-xs font-black flex items-center gap-2 cursor-pointer transition"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-indigo-200 text-xs font-black flex items-center justify-center gap-2 cursor-pointer transition"
               >
                 <Camera className="w-4 h-4 text-indigo-300" />
                 <span>Upload Custom Photo File</span>
@@ -538,7 +538,7 @@ export const ProfilePage: React.FC = () => {
                   } catch (err) {}
                   setShowAvatarModal(false);
                 }}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-900/50 border border-slate-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-200 text-xs font-black flex items-center gap-2 cursor-pointer transition"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-900/50 border border-slate-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-200 text-xs font-black flex items-center justify-center gap-2 cursor-pointer transition"
               >
                 <Trash2 className="w-4 h-4 text-rose-400" />
                 <span>Leave as Default Initials</span>
@@ -566,17 +566,17 @@ export const ProfilePage: React.FC = () => {
       {/* CANDIDATE HERO BANNER CARD WITH 3D POP-FORWARD ANIMATION */}
       <div
         onMouseEnter={() => playProfileChime(540)}
-        className="relative overflow-hidden group bg-[#15151A] border-2 border-indigo-500/50 hover:border-indigo-400/80 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl shadow-indigo-500/10 flex flex-col md:flex-row items-center md:items-start justify-between gap-6 sm:gap-8 transform hover:-translate-y-3 hover:scale-[1.015] transition-all duration-500 cursor-pointer"
+        className="relative overflow-hidden group bg-[#15151A] border-2 border-indigo-500/50 hover:border-indigo-400/80 rounded-2xl sm:rounded-3xl p-4 sm:p-8 lg:p-10 shadow-2xl shadow-indigo-500/10 flex flex-col md:flex-row items-center md:items-start justify-between gap-5 sm:gap-8 transform hover:-translate-y-3 hover:scale-[1.015] transition-all duration-500 cursor-pointer"
       >
         {/* Soft colorful background gradient overlay that smoothly fades on hover */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/45 via-purple-900/35 to-slate-950 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none" />
         {/* Top glowing light beam when box opens/moves forward */}
         <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-transparent via-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8 flex-1">
+        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-5 sm:gap-8 flex-1 w-full">
           {/* Avatar Section */}
           <div className="relative group/avatar shrink-0">
-            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl p-1 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 shadow-2xl shadow-indigo-500/30">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl p-1 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 shadow-2xl shadow-indigo-500/30">
               {profilePreview ? (
                 <button
                   type="button"
@@ -594,7 +594,7 @@ export const ProfilePage: React.FC = () => {
                   />
                 </button>
               ) : (
-                <div className="w-full h-full rounded-[22px] bg-slate-900 text-white flex items-center justify-center text-3xl font-black">
+                <div className="w-full h-full rounded-[22px] bg-slate-900 text-white flex items-center justify-center text-2xl sm:text-3xl font-black">
                   {(user?.name || "C").charAt(0).toUpperCase()}
                 </div>
               )}
@@ -611,19 +611,19 @@ export const ProfilePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowAvatarModal(true)}
-              className="absolute -top-2 -right-2 p-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 text-white shadow-xl hover:scale-110 transition cursor-pointer border border-pink-300/40 z-10"
+              className="absolute -top-2 -right-2 p-2 sm:p-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 text-white shadow-xl hover:scale-110 transition cursor-pointer border border-pink-300/40 z-10"
               title="Select from AI Avatar Gallery"
             >
-              <Sparkles className="w-4 h-4 text-amber-200" />
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-200" />
             </button>
 
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-2 -right-2 p-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl hover:scale-110 transition group-hover/avatar:scale-110 cursor-pointer border border-indigo-300/40 z-10"
+              className="absolute -bottom-2 -right-2 p-2 sm:p-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl hover:scale-110 transition group-hover/avatar:scale-110 cursor-pointer border border-indigo-300/40 z-10"
               title="Upload custom photo from computer"
             >
-              <Camera className="w-4 h-4" />
+              <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
             {profilePreview && (
@@ -638,26 +638,26 @@ export const ProfilePage: React.FC = () => {
                   } catch (err) {}
                   if (fileInputRef.current) fileInputRef.current.value = "";
                 }}
-                className="absolute -bottom-2 -left-2 p-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-xl hover:scale-110 transition cursor-pointer border border-rose-300/40 z-10"
+                className="absolute -bottom-2 -left-2 p-2 sm:p-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-xl hover:scale-110 transition cursor-pointer border border-rose-300/40 z-10"
                 title="Remove photo and leave as default initials"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             )}
           </div>
 
           {/* User Info Overview */}
-          <div className="flex-1 text-center md:text-left flex flex-col gap-3">
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 text-xs font-black uppercase tracking-wider shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-spin" /> Candidate Readiness Center
+          <div className="flex-1 text-center md:text-left flex flex-col gap-2.5 sm:gap-3 w-full">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5 sm:gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-sm">
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-400 animate-spin" /> Candidate Readiness Center
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-xs font-black shadow-sm">
-                <Check className="w-3.5 h-3.5 text-emerald-400" /> Verified Candidate
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] sm:text-xs font-black shadow-sm">
+                <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" /> Verified Candidate
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+            <h1 className="text-xl sm:text-4xl font-black text-white tracking-tight break-words">
               {user?.name || "Candidate Name"}
             </h1>
 
@@ -666,11 +666,11 @@ export const ProfilePage: React.FC = () => {
             </p>
 
             {/* Avatar Photo & Preset Gallery Action Pills */}
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5 sm:gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setShowAvatarModal(true)}
-                className="px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/35 border border-purple-400/40 text-purple-200 text-xs font-black flex items-center gap-1.5 transition cursor-pointer"
+                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/35 border border-purple-400/40 text-purple-200 text-[11px] sm:text-xs font-black flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 <span>Preset AI Avatars</span>
@@ -679,7 +679,7 @@ export const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/40 text-indigo-200 text-xs font-black flex items-center gap-1.5 transition cursor-pointer"
+                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/40 text-indigo-200 text-[11px] sm:text-xs font-black flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Camera className="w-3.5 h-3.5 text-indigo-300" />
                 <span>Upload Photo</span>
@@ -696,7 +696,7 @@ export const ProfilePage: React.FC = () => {
                     } catch (err) {}
                     if (fileInputRef.current) fileInputRef.current.value = "";
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/40 text-rose-200 text-xs font-black flex items-center gap-1.5 transition cursor-pointer"
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/40 text-rose-200 text-[11px] sm:text-xs font-black flex items-center gap-1.5 transition cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-300" />
                   <span>Leave as Initials</span>
@@ -705,18 +705,18 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {/* Quick Metrics Cards */}
-            <div className="grid grid-cols-3 gap-3 pt-2 max-w-md mx-auto md:mx-0">
-              <div className="p-3 rounded-2xl bg-indigo-950/60 border border-indigo-500/30 text-center shadow-md">
-                <p className="text-[10px] font-black text-indigo-300 uppercase tracking-wider">Target Role</p>
-                <p className="text-xs sm:text-sm font-black text-white mt-1 truncate">{formData.targetRole}</p>
+            <div className="grid grid-cols-1 xs:grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-3 pt-2 max-w-md w-full mx-auto md:mx-0">
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-indigo-950/60 border border-indigo-500/30 text-center shadow-md">
+                <p className="text-[9px] sm:text-[10px] font-black text-indigo-300 uppercase tracking-wider">Target Role</p>
+                <p className="text-xs sm:text-sm font-black text-white mt-0.5 sm:mt-1 truncate">{formData.targetRole}</p>
               </div>
-              <div className="p-3 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-center shadow-md">
-                <p className="text-[10px] font-black text-emerald-300 uppercase tracking-wider">AI Score Index</p>
-                <p className="text-xs sm:text-sm font-black text-emerald-300 mt-1">92 / 100</p>
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-center shadow-md">
+                <p className="text-[9px] sm:text-[10px] font-black text-emerald-300 uppercase tracking-wider">AI Score Index</p>
+                <p className="text-xs sm:text-sm font-black text-emerald-300 mt-0.5 sm:mt-1">92 / 100</p>
               </div>
-              <div className="p-3 rounded-2xl bg-purple-950/60 border border-purple-500/30 text-center shadow-md">
-                <p className="text-[10px] font-black text-purple-300 uppercase tracking-wider">Loop Status</p>
-                <p className="text-xs sm:text-sm font-black text-purple-200 mt-1">Interview Ready</p>
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-purple-950/60 border border-purple-500/30 text-center shadow-md">
+                <p className="text-[9px] sm:text-[10px] font-black text-purple-300 uppercase tracking-wider">Loop Status</p>
+                <p className="text-xs sm:text-sm font-black text-purple-200 mt-0.5 sm:mt-1 truncate">Interview Ready</p>
               </div>
             </div>
           </div>

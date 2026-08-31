@@ -108,16 +108,16 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="flex flex-col gap-24 pb-16">
       {/* HERO SECTION */}
-      <section className="relative pt-12 pb-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
+      <section className="relative pt-8 sm:pt-12 pb-14 sm:pb-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-xs font-bold uppercase tracking-wider mb-8 animate-fade-in">
-            <Sparkles className="w-4 h-4 text-indigo-500" />
-            <span>Next-Gen AI Campus Placement & Technical Mock Platform</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-6 sm:mb-8 animate-fade-in max-w-full">
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
+            <span className="truncate">Next-Gen AI Campus Placement & Technical Mock Platform</span>
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.1] max-w-4xl mb-6">
+          <h1 className="text-2xl sm:text-5xl lg:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15] sm:leading-[1.1] max-w-4xl mb-4 sm:mb-6">
             Master Technical Interviews with{" "}
             <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               Real-time AI Simulation
@@ -125,25 +125,25 @@ export const LandingPage: React.FC = () => {
           </h1>
 
           {/* Subtext */}
-          <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mb-10 leading-relaxed font-normal">
+          <p className="text-xs sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mb-8 sm:mb-10 leading-relaxed font-normal">
             Simulate realistic FAANG technical & HR interview loops with voice speech recognition, live webcam proctoring, ATS resume parsing, and instant AI answer evaluations.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-5 w-full justify-center max-w-lg">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-5 w-full justify-center max-w-lg">
             <Link
               to={isAuthenticated ? "/setup" : "/login?unregistered=true"}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-white font-extrabold text-base shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-purple-500/50 hover:-translate-y-1.5 hover:scale-105 active:scale-95 transition-all duration-300 transform flex items-center justify-center gap-2.5 group cursor-pointer"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-purple-500/50 hover:-translate-y-1.5 hover:scale-105 active:scale-95 transition-all duration-300 transform flex items-center justify-center gap-2.5 group cursor-pointer"
             >
-              <Sparkles className="w-5 h-5 text-indigo-200 group-hover:rotate-12 transition-transform" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-200 group-hover:rotate-12 transition-transform" />
               <span>Start Free AI Interview</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1.5 transition-transform" />
             </Link>
             <Link
               to={isAuthenticated ? "/resume" : "/login?unregistered=true"}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-indigo-500/20 dark:from-purple-900/50 dark:via-pink-900/40 dark:to-indigo-900/50 hover:from-purple-500/35 hover:via-pink-500/35 hover:to-indigo-500/35 border-2 border-indigo-500/50 dark:border-purple-400/50 text-slate-900 dark:text-white font-extrabold text-base shadow-lg shadow-purple-500/15 hover:shadow-2xl hover:shadow-pink-500/40 hover:border-pink-500 dark:hover:border-pink-400 hover:-translate-y-1.5 hover:scale-105 active:scale-95 transition-all duration-300 transform flex items-center justify-center gap-2.5 group cursor-pointer backdrop-blur-md"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-indigo-500/20 dark:from-purple-900/50 dark:via-pink-900/40 dark:to-indigo-900/50 hover:from-purple-500/35 hover:via-pink-500/35 hover:to-indigo-500/35 border-2 border-indigo-500/50 dark:border-purple-400/50 text-slate-900 dark:text-white font-extrabold text-sm sm:text-base shadow-lg shadow-purple-500/15 hover:shadow-2xl hover:shadow-pink-500/40 hover:border-pink-500 dark:hover:border-pink-400 hover:-translate-y-1.5 hover:scale-105 active:scale-95 transition-all duration-300 transform flex items-center justify-center gap-2.5 group cursor-pointer backdrop-blur-md"
             >
-              <FileCheck className="w-5 h-5 text-purple-500 dark:text-purple-300 group-hover:scale-110 transition-transform" />
+              <FileCheck className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 dark:text-purple-300 group-hover:scale-110 transition-transform" />
               <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-200 dark:via-purple-200 dark:to-pink-200 bg-clip-text text-transparent">
                 Analyze Resume ATS
               </span>
@@ -151,36 +151,36 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Proof stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 max-w-5xl w-full mt-16 pt-12 border-t border-slate-200 dark:border-slate-800/80">
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-indigo-600/25 to-purple-700/30 dark:from-indigo-900/60 dark:via-purple-900/50 dark:to-indigo-950/80 border-2 border-indigo-500/50 hover:border-indigo-400 backdrop-blur-md flex flex-col items-center justify-center text-center group hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 transform cursor-pointer">
-              <p className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 max-w-5xl w-full mt-10 sm:mt-16 pt-8 sm:pt-12 border-t border-slate-200 dark:border-slate-800/80">
+            <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-indigo-600/25 to-purple-700/30 dark:from-indigo-900/60 dark:via-purple-900/50 dark:to-indigo-950/80 border-2 border-indigo-500/50 hover:border-indigo-400 backdrop-blur-md flex flex-col items-center justify-center text-center group hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 transform cursor-pointer">
+              <p className="text-2xl sm:text-4xl font-black bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">
                 50,000+
               </p>
-              <p className="text-xs text-slate-700 dark:text-slate-200 font-extrabold mt-2">
-                Mock Sessions Generated
+              <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-200 font-extrabold mt-1 sm:mt-2">
+                Mock Sessions
               </p>
             </div>
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/20 via-pink-600/25 to-rose-700/30 dark:from-purple-900/60 dark:via-pink-900/50 dark:to-purple-950/80 border-2 border-purple-500/50 hover:border-purple-400 backdrop-blur-md flex flex-col items-center justify-center text-center group hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 transform cursor-pointer">
-              <p className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">
+            <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-br from-purple-500/20 via-pink-600/25 to-rose-700/30 dark:from-purple-900/60 dark:via-pink-900/50 dark:to-purple-950/80 border-2 border-purple-500/50 hover:border-purple-400 backdrop-blur-md flex flex-col items-center justify-center text-center group hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 transform cursor-pointer">
+              <p className="text-2xl sm:text-4xl font-black bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">
                 94.8%
               </p>
-              <p className="text-xs text-slate-700 dark:text-slate-200 font-extrabold mt-2">
-                Placement Success Rate
+              <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-200 font-extrabold mt-1 sm:mt-2">
+                Placement Rate
               </p>
             </div>
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-teal-600/25 to-blue-700/30 dark:from-cyan-900/60 dark:via-teal-900/50 dark:to-blue-950/80 border-2 border-cyan-500/50 hover:border-cyan-400 backdrop-blur-md flex flex-col items-center justify-center text-center group hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300 transform cursor-pointer">
-              <p className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">
+            <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-teal-600/25 to-blue-700/30 dark:from-cyan-900/60 dark:via-teal-900/50 dark:to-blue-950/80 border-2 border-cyan-500/50 hover:border-cyan-400 backdrop-blur-md flex flex-col items-center justify-center text-center group hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300 transform cursor-pointer">
+              <p className="text-2xl sm:text-4xl font-black bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">
                 &lt; 1.2s
               </p>
-              <p className="text-xs text-slate-700 dark:text-slate-200 font-extrabold mt-2">
-                Gemini AI Evaluation Speed
+              <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-200 font-extrabold mt-1 sm:mt-2">
+                AI Evaluation Speed
               </p>
             </div>
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-600/25 to-pink-700/30 dark:from-amber-900/60 dark:via-orange-900/50 dark:to-pink-950/80 border-2 border-amber-500/50 hover:border-amber-400 backdrop-blur-md flex flex-col items-center justify-center text-center group hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/40 transition-all duration-300 transform cursor-pointer">
-              <p className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">
+            <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-600/25 to-pink-700/30 dark:from-amber-900/60 dark:via-orange-900/50 dark:to-pink-950/80 border-2 border-amber-500/50 hover:border-amber-400 backdrop-blur-md flex flex-col items-center justify-center text-center group hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/40 transition-all duration-300 transform cursor-pointer">
+              <p className="text-2xl sm:text-4xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">
                 100%
               </p>
-              <p className="text-xs text-slate-700 dark:text-slate-200 font-extrabold mt-2">
+              <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-200 font-extrabold mt-1 sm:mt-2">
                 Dynamic Questions
               </p>
             </div>

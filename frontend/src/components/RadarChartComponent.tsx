@@ -24,7 +24,7 @@ export const RadarChartComponent: React.FC<RadarChartProps> = ({ metrics }) => {
   ];
 
   return (
-    <div className="w-full h-64 sm:h-72">
+    <div className="w-full h-56 sm:h-72 min-w-0">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data}>
           <PolarGrid stroke="#334155" />

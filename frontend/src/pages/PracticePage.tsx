@@ -1869,24 +1869,24 @@ export const PracticePage: React.FC = () => {
 }
 
   return (
-    <div className="max-w-7xl w-full mx-auto px-3 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 flex flex-col gap-5 sm:gap-6 lg:gap-8 overflow-x-hidden">
+    <div className="max-w-7xl w-full mx-auto px-3 sm:px-5 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 flex flex-col gap-4 sm:gap-6 lg:gap-8 min-w-0">
 
       {/* Header */}
       <div>
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 text-xs font-bold uppercase tracking-wider mb-2">
-          <Terminal className="w-3.5 h-3.5 text-purple-400" /> Practice Sandbox & LeetCode Library
+          <Terminal className="w-3.5 h-3.5 text-purple-400 shrink-0" /> Practice Sandbox & LeetCode Library
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
           LeetCode Algorithms, MCQs & Language Fill-in-the-Blanks
         </h1>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
           Select your target language (Python, C, Java, C++, JS, SQL) for tailored Fill-in-the-Blanks and MCQs, or solve classic LeetCode coding problems with multi-language starter templates.
         </p>
       </div>
 
       {/* Main Category Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800/80 pb-4">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800/80 pb-4 w-full">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 sm:pb-0 w-full no-scrollbar">
           {["All", "Coding", "Fill in Blanks", "MCQ", "Behavioral", "Technical"].map((tab, idx) => (
             <button
               key={tab}
@@ -1895,7 +1895,7 @@ export const PracticePage: React.FC = () => {
                 playPracticeChime(700 + idx * 50);
                 setActiveTab(tab);
               }}
-              className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all transform hover:scale-105 cursor-pointer whitespace-nowrap ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all transform hover:scale-105 cursor-pointer whitespace-nowrap shrink-0 ${
                 activeTab === tab
                   ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white font-extrabold shadow-lg shadow-indigo-500/30 border border-purple-300/40"
                   : "bg-[#1A1D2B] text-slate-300 border border-slate-700/80 hover:border-purple-400 hover:text-white hover:bg-[#22263B]"
@@ -1910,7 +1910,7 @@ export const PracticePage: React.FC = () => {
       {/* Language / Topic Selection Prompt bar with Rich Glass Tint */}
       <div 
         onMouseEnter={() => playPracticeChime(600)}
-        className="relative p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#1B1838] via-[#15162B] to-[#111322] border-2 border-purple-500/40 hover:border-purple-400/80 overflow-hidden shadow-2xl shadow-purple-950/70 group transform hover:-translate-y-3 hover:scale-[1.015] transition-all duration-500 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer"
+        className="relative p-3.5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#1B1838] via-[#15162B] to-[#111322] border-2 border-purple-500/40 hover:border-purple-400/80 overflow-hidden shadow-2xl shadow-purple-950/70 group transform hover:-translate-y-2 hover:scale-[1.01] transition-all duration-500 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer w-full"
       >
         {/* Top glowing light beam when box opens/moves forward */}
         <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-transparent via-purple-200 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20" />
@@ -1919,8 +1919,8 @@ export const PracticePage: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/25 via-pink-600/15 to-indigo-600/20 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none" />
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border border-purple-400/50 flex items-center justify-center shrink-0 shadow-lg text-purple-300">
-            <Cpu className="w-5 h-5 text-purple-300" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border border-purple-400/50 flex items-center justify-center shrink-0 shadow-lg text-purple-300">
+            <Cpu className="w-4 h-4 sm:w-5 sm:h-5 text-purple-300" />
           </div>
           <div>
             <h4 className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider">
@@ -1934,7 +1934,7 @@ export const PracticePage: React.FC = () => {
 
         <div className="relative z-10 flex flex-col gap-3 w-full md:w-auto">
           {/* Language / Topic buttons */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 w-full">
             {[
               "All",
               "Python",
@@ -1964,7 +1964,7 @@ export const PracticePage: React.FC = () => {
           </div>
 
           {/* Difficulty & Generate AI Questions */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full">
             <span className="text-xs font-bold text-slate-300">
               Difficulty:
             </span>
@@ -2005,7 +2005,7 @@ export const PracticePage: React.FC = () => {
                 handleGenerateCustomQuestions();
               }}
               disabled={generatingCustom}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold shadow-lg shadow-purple-500/40 border border-purple-300/40 text-xs flex items-center gap-1.5 transition-all transform hover:scale-105 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold shadow-lg shadow-purple-500/40 border border-purple-300/40 text-xs flex items-center justify-center gap-1.5 transition-all transform hover:scale-105 cursor-pointer disabled:opacity-50 mt-1 sm:mt-0"
             >
               {generatingCustom ? (
                 <>
@@ -2014,11 +2014,8 @@ export const PracticePage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Wand2 className="w-3.5 h-3.5 text-white" />
-                  Generate {selectedDifficulty}{" "}
-                  {selectedLanguageFilter === "All"
-                    ? "Mixed AI"
-                    : selectedLanguageFilter} Questions
+                  <Wand2 className="w-3.5 h-3.5 text-white shrink-0" />
+                  <span>Generate {selectedDifficulty} {selectedLanguageFilter === "All" ? "Mixed AI" : selectedLanguageFilter} Questions</span>
                 </>
               )}
             </button>
@@ -2027,10 +2024,10 @@ export const PracticePage: React.FC = () => {
       </div>
 
         {/* Practice Progress Summary Cards (Rich Vibrant Glass Color Fills) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full">
           <div
             onMouseEnter={() => playPracticeChime(540)}
-            className="relative overflow-hidden px-4.5 py-3.5 rounded-2xl bg-gradient-to-br from-[#121B38] via-[#15172C] to-[#0F111E] border-2 border-cyan-400/50 hover:border-cyan-300 transform hover:-translate-y-2.5 hover:scale-[1.025] hover:shadow-2xl transition-all duration-500 shadow-xl shadow-cyan-950/60 flex items-center justify-between group cursor-pointer"
+            className="relative overflow-hidden px-4.5 py-3.5 rounded-2xl bg-gradient-to-br from-[#121B38] via-[#15172C] to-[#0F111E] border-2 border-cyan-400/50 hover:border-cyan-300 transform hover:-translate-y-2 hover:scale-[1.015] transition-all duration-500 shadow-xl shadow-cyan-950/60 flex items-center justify-between group cursor-pointer w-full"
           >
             {/* Luminous Cyan Glass Overlay that smoothly fades out on hover */}
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 via-indigo-500/20 to-transparent group-hover:opacity-20 transition-opacity duration-500 pointer-events-none" />
@@ -2065,7 +2062,7 @@ export const PracticePage: React.FC = () => {
 
           <div
             onMouseEnter={() => playPracticeChime(580)}
-            className="relative overflow-hidden px-4.5 py-3.5 rounded-2xl bg-gradient-to-br from-[#0F2824] via-[#122224] to-[#0F111E] border-2 border-emerald-400/50 hover:border-emerald-300 transform hover:-translate-y-2.5 hover:scale-[1.025] hover:shadow-2xl transition-all duration-500 shadow-xl shadow-emerald-950/60 flex items-center justify-between group cursor-pointer"
+            className="relative overflow-hidden px-4.5 py-3.5 rounded-2xl bg-gradient-to-br from-[#0F2824] via-[#122224] to-[#0F111E] border-2 border-emerald-400/50 hover:border-emerald-300 transform hover:-translate-y-2 hover:scale-[1.015] transition-all duration-500 shadow-xl shadow-emerald-950/60 flex items-center justify-between group cursor-pointer w-full"
           >
             {/* Luminous Emerald Glass Overlay that smoothly fades out on hover */}
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/30 via-teal-500/20 to-transparent group-hover:opacity-20 transition-opacity duration-500 pointer-events-none" />
@@ -2103,7 +2100,7 @@ export const PracticePage: React.FC = () => {
 
           <div
             onMouseEnter={() => playPracticeChime(620)}
-            className="relative overflow-hidden px-4.5 py-3.5 rounded-2xl bg-gradient-to-br from-[#2F1528] via-[#231526] to-[#0F111E] border-2 border-fuchsia-400/50 hover:border-fuchsia-300 transform hover:-translate-y-2.5 hover:scale-[1.025] hover:shadow-2xl transition-all duration-500 shadow-xl shadow-fuchsia-950/60 flex items-center justify-between group cursor-pointer"
+            className="relative overflow-hidden px-4.5 py-3.5 rounded-2xl bg-gradient-to-br from-[#2F1528] via-[#231526] to-[#0F111E] border-2 border-fuchsia-400/50 hover:border-fuchsia-300 transform hover:-translate-y-2 hover:scale-[1.015] transition-all duration-500 shadow-xl shadow-fuchsia-950/60 flex items-center justify-between group cursor-pointer w-full"
           >
             {/* Luminous Fuchsia Glass Overlay that smoothly fades out on hover */}
             <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/30 via-rose-500/20 to-transparent group-hover:opacity-20 transition-opacity duration-500 pointer-events-none" />
@@ -2130,11 +2127,11 @@ export const PracticePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8 items-start w-full">
         {/* Left Question List */}
-        <div className="lg:col-span-5 flex flex-col gap-3 max-h-[700px] overflow-y-auto pr-1">
+        <div className="lg:col-span-5 flex flex-col gap-3 max-h-[700px] overflow-y-auto pr-1 w-full">
           {filteredQuestions.length === 0 ? (
-            <div className="p-4 sm:p-6 lg:p-8 rounded-2xl bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800 text-center flex flex-col items-center gap-3">
+            <div className="p-4 sm:p-6 lg:p-8 rounded-2xl bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800 text-center flex flex-col items-center gap-3 w-full">
               <Cpu className="w-8 h-8 text-indigo-500" />
               <p className="text-xs text-slate-500 font-medium">
                 No pre-loaded questions found for <span className="font-bold text-slate-900 dark:text-white">{selectedLanguageFilter}</span> under <span className="font-bold text-slate-900 dark:text-white">{activeTab}</span>.
@@ -2142,7 +2139,7 @@ export const PracticePage: React.FC = () => {
               <button
                 onClick={handleGenerateCustomQuestions}
                 disabled={generatingCustom}
-                className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition cursor-pointer"
               >
                 Generate {selectedLanguageFilter} Questions with Gemini AI
               </button>
@@ -2162,7 +2159,7 @@ export const PracticePage: React.FC = () => {
 
         {/* Right Active Question Sandbox with Rich Glass Tint */}
         {selectedQuestion && (
-          <div className="relative overflow-hidden group lg:col-span-7 bg-gradient-to-br from-[#1A183B] via-[#15162B] to-[#111322] border-2 border-purple-500/40 hover:border-purple-400/80 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl shadow-purple-950/70 flex flex-col gap-6 transform hover:-translate-y-2.5 hover:scale-[1.015] transition-all duration-500 cursor-pointer">
+          <div className="relative overflow-hidden group lg:col-span-7 bg-gradient-to-br from-[#1A183B] via-[#15162B] to-[#111322] border-2 border-purple-500/40 hover:border-purple-400/80 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl shadow-purple-950/70 flex flex-col gap-5 sm:gap-6 transform hover:-translate-y-2 hover:scale-[1.01] transition-all duration-500 cursor-pointer w-full">
             {/* Top glowing light beam when box opens/moves forward */}
             <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-transparent via-purple-200 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20" />
             <div>
@@ -2186,7 +2183,7 @@ export const PracticePage: React.FC = () => {
 
             {/* Step-by-Step Hints Drawer */}
             {selectedQuestion.hints && selectedQuestion.hints.length > 0 && (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-950/60 via-orange-950/40 to-[#121422] border border-amber-500/40 text-amber-200 flex flex-col gap-2 shadow-lg">
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-950/60 via-orange-950/40 to-[#121422] border border-amber-500/40 text-amber-200 flex flex-col gap-2 shadow-lg w-full">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black flex items-center gap-1.5 text-amber-300">
                     <Lightbulb className="w-4 h-4 text-amber-400" /> Need a hint?
@@ -2195,7 +2192,7 @@ export const PracticePage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setRevealedHintIndex((prev) => prev + 1)}
-                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-xs font-black hover:from-amber-400 hover:to-orange-400 transition shadow-md cursor-pointer"
+                      className="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-xs font-black hover:from-amber-400 hover:to-orange-400 transition shadow-md cursor-pointer"
                     >
                       Reveal {revealedHintIndex === -1 ? "Hint 1" : `Hint ${revealedHintIndex + 2}`}
                     </button>
@@ -2203,11 +2200,11 @@ export const PracticePage: React.FC = () => {
                 </div>
 
                 {revealedHintIndex >= 0 && (
-                  <div className="flex flex-col gap-1.5 mt-1">
+                  <div className="flex flex-col gap-1.5 mt-1 w-full">
                     {selectedQuestion.hints.slice(0, revealedHintIndex + 1).map((hint, i) => (
                       <p
                         key={i}
-                        className="text-xs bg-[#1A1C30]/90 p-3 rounded-xl border border-amber-500/30 text-amber-100 font-medium leading-relaxed"
+                        className="text-xs bg-[#1A1C30]/90 p-3 rounded-xl border border-amber-500/30 text-amber-100 font-medium leading-relaxed break-words"
                       >
                         {hint}
                       </p>
@@ -2219,12 +2216,12 @@ export const PracticePage: React.FC = () => {
 
             {/* MCQ Options */}
             {selectedQuestion.type === "MCQ" && selectedQuestion.options && (
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2.5 w-full">
                 {selectedQuestion.options.map((opt, i) => (
                   <button
                     key={i}
                     onClick={() => setMcqChoice(opt)}
-                    className={`p-3.5 rounded-xl border text-xs text-left transition transform hover:scale-[1.01] cursor-pointer ${
+                    className={`p-3 sm:p-3.5 rounded-xl border text-xs text-left transition transform hover:scale-[1.01] cursor-pointer w-full break-words ${
                       mcqChoice === opt
                         ? "border-2 border-purple-300 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold shadow-lg shadow-purple-500/40"
                         : "border border-purple-500/30 bg-[#1E2138] text-purple-100 hover:border-purple-400 hover:bg-[#252945] font-medium"
@@ -2238,21 +2235,21 @@ export const PracticePage: React.FC = () => {
 
             {/* Fill in the Blanks UI */}
             {selectedQuestion.type === "Fill in Blanks" && (
-              <div className="flex flex-col gap-4 p-5 rounded-2xl bg-gradient-to-br from-[#0F1424] to-[#14182E] border border-cyan-500/40 text-cyan-100 font-mono text-xs shadow-lg">
+              <div className="flex flex-col gap-3 sm:gap-4 p-3.5 sm:p-5 rounded-2xl bg-gradient-to-br from-[#0F1424] to-[#14182E] border border-cyan-500/40 text-cyan-100 font-mono text-xs shadow-lg w-full">
                 <span className="text-[11px] font-extrabold text-cyan-300 uppercase tracking-wider">
                   Fill in the Blank Snippet ({selectedQuestion.topicOrLanguage || "Language"})
                 </span>
-                <pre className="text-amber-300 font-mono whitespace-pre-wrap leading-relaxed">
+                <pre className="text-amber-300 font-mono whitespace-pre-wrap leading-relaxed overflow-x-auto p-2 bg-[#090C17] rounded-xl border border-cyan-500/20">
                   {selectedQuestion.fillBlankSnippet || "/* Fill in the missing syntax below */"}
                 </pre>
-                <div className="flex items-center gap-3 mt-2">
-                  <span className="text-cyan-300 font-bold">Answer:</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1 w-full">
+                  <span className="text-cyan-300 font-bold shrink-0">Answer:</span>
                   <input
                     type="text"
                     value={fillBlankInput}
                     onChange={(e) => setFillBlankInput(e.target.value)}
                     placeholder="Type missing keyword or value..."
-                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#1B1F36] border border-cyan-400/50 text-white font-bold text-xs focus:ring-2 focus:ring-cyan-400 outline-none"
+                    className="w-full sm:flex-1 px-3.5 py-2.5 rounded-xl bg-[#1B1F36] border border-cyan-400/50 text-white font-bold text-xs focus:ring-2 focus:ring-cyan-400 outline-none"
                   />
                 </div>
               </div>
@@ -2260,12 +2257,14 @@ export const PracticePage: React.FC = () => {
 
             {/* Coding Editor with Language Preference */}
             {selectedQuestion.type === "Coding" && (
-              <CodeEditor
-                initialCode={userCode}
-                onCodeChange={setUserCode}
-                selectedLanguage={selectedLanguage}
-                onLanguageChange={handleLanguageChange}
-              />
+              <div className="w-full min-w-0">
+                <CodeEditor
+                  initialCode={userCode}
+                  onCodeChange={setUserCode}
+                  selectedLanguage={selectedLanguage}
+                  onLanguageChange={handleLanguageChange}
+                />
+              </div>
             )}
 
             {/* Text Answer for Behavioral/Technical */}
@@ -2275,7 +2274,7 @@ export const PracticePage: React.FC = () => {
                 value={userAnswerText}
                 onChange={(e) => setUserAnswerText(e.target.value)}
                 placeholder="Write your STAR framing or technical explanation here..."
-                className="w-full p-4 rounded-2xl border-2 border-purple-500/30 bg-[#1A1C30] text-white text-sm focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none leading-relaxed resize-none shadow-inner placeholder-purple-300/50 font-medium"
+                className="w-full p-3.5 sm:p-4 rounded-2xl border-2 border-purple-500/30 bg-[#1A1C30] text-white text-xs sm:text-sm focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none leading-relaxed resize-none shadow-inner placeholder-purple-300/50 font-medium"
               />
             )}
 
@@ -2283,7 +2282,7 @@ export const PracticePage: React.FC = () => {
             <button
               onClick={handleRunEvaluation}
               disabled={evaluating}
-              className="py-3.5 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-black text-sm shadow-xl shadow-indigo-500/40 border border-purple-300/40 transform hover:scale-[1.01] transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-black text-xs sm:text-sm shadow-xl shadow-indigo-500/40 border border-purple-300/40 transform hover:scale-[1.01] transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {evaluating ? (
                 <>
@@ -2292,7 +2291,7 @@ export const PracticePage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Send className="w-4 h-4" />
+                  <Send className="w-4 h-4 shrink-0" />
                   <span>Submit Practice Response</span>
                 </>
               )}
@@ -2300,40 +2299,40 @@ export const PracticePage: React.FC = () => {
 
             {/* Evaluation Result Card */}
             {evaluation && (
-              <div className="p-4 sm:p-5 lg:p-6 rounded-2xl bg-slate-900 text-white border border-indigo-500/40 flex flex-col gap-4 animate-fade-in">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="p-3.5 sm:p-5 lg:p-6 rounded-2xl bg-slate-900 text-white border border-indigo-500/40 flex flex-col gap-4 animate-fade-in w-full">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3 w-full">
                   <div className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-indigo-400" />
-                    <h4 className="text-sm font-bold">Practice Evaluation Feedback</h4>
+                    <Award className="w-5 h-5 text-indigo-400 shrink-0" />
+                    <h4 className="text-xs sm:text-sm font-bold">Practice Evaluation Feedback</h4>
                   </div>
                   <ScoreBadge score={evaluation.score} size="sm" />
                 </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed font-semibold">
+                <p className="text-xs text-slate-300 leading-relaxed font-semibold break-words">
                   {evaluation.correctness}
                 </p>
 
                 {evaluation.strengths && evaluation.strengths.length > 0 && (
-                  <div>
+                  <div className="w-full">
                     <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block mb-1">
                       Strengths
                     </span>
                     <ul className="text-xs text-slate-300 list-disc list-inside space-y-1">
                       {evaluation.strengths.map((s: string, i: number) => (
-                        <li key={i}>{s}</li>
+                        <li key={i} className="break-words">{s}</li>
                       ))}
                     </ul>
                   </div>
                 )}
 
                 {evaluation.improvements && evaluation.improvements.length > 0 && (
-                  <div>
+                  <div className="w-full">
                     <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block mb-1">
                       Improvement Tips
                     </span>
                     <ul className="text-xs text-slate-300 list-disc list-inside space-y-1">
                       {evaluation.improvements.map((imp: string, i: number) => (
-                        <li key={i}>{imp}</li>
+                        <li key={i} className="break-words">{imp}</li>
                       ))}
                     </ul>
                   </div>

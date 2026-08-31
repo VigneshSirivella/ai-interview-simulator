@@ -96,7 +96,7 @@ export const ReportsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl w-full mx-auto px-3 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 flex flex-col gap-5 sm:gap-6 lg:gap-8 overflow-x-hidden">
+    <div className="max-w-7xl w-full mx-auto px-3 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 flex flex-col gap-5 sm:gap-6 lg:gap-8 min-w-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -149,7 +149,7 @@ export const ReportsPage: React.FC = () => {
             return (
               <div
                 key={report.id}
-                className={`relative overflow-hidden p-4 sm:p-5 lg:p-6 rounded-3xl bg-[#15151A] border ${theme.border} shadow-2xl transform hover:-translate-y-2.5 hover:scale-[1.025] transition-all duration-500 flex flex-col justify-between gap-6 group cursor-pointer`}
+                className={`relative overflow-hidden p-3.5 sm:p-5 lg:p-6 rounded-3xl bg-[#15151A] border ${theme.border} shadow-2xl transform hover:-translate-y-2 hover:scale-[1.01] transition-all duration-500 flex flex-col justify-between gap-5 sm:gap-6 group cursor-pointer w-full`}
               >
                 {/* Dynamic color background fill overlay that smoothly fades out on mouse enter */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient} group-hover:opacity-20 transition-opacity duration-500 pointer-events-none`} />

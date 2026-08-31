@@ -242,10 +242,10 @@ export const ResultPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-10 flex flex-col gap-6 sm:gap-8 lg:gap-10 min-w-0">
 
       {/* HEADER */}
-      <div className="rounded-3xl bg-[#15151A] border-2 border-purple-500/40 hover:border-purple-300 text-white p-8 sm:p-10 shadow-2xl shadow-purple-950/70 hover:shadow-purple-500/30 relative overflow-hidden group flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transform hover:-translate-y-2 hover:scale-[1.015] transition-all duration-500 cursor-pointer">
+      <div className="rounded-3xl bg-[#15151A] border-2 border-purple-500/40 hover:border-purple-300 text-white p-4 sm:p-8 lg:p-10 shadow-2xl shadow-purple-950/70 hover:shadow-purple-500/30 relative overflow-hidden group flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transform hover:-translate-y-2 hover:scale-[1.015] transition-all duration-500 cursor-pointer w-full">
         {/* Dynamic color background fill overlay that smoothly fades out on mouse enter */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#1A183B] via-[#15162B] to-[#111322] group-hover:opacity-30 transition-opacity duration-500 pointer-events-none" />
         {/* Top glowing light beam when card pops forward */}
@@ -253,32 +253,28 @@ export const ResultPage: React.FC = () => {
 
         <div className="relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 text-xs font-black uppercase tracking-wider mb-3 shadow-sm">
-            <CheckCircle2 className="w-4 h-4" />
-
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
             Assessment Finalized
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
             Interview Performance Report
           </h1>
 
           <p className="text-xs sm:text-sm text-purple-200/90 mt-2 flex flex-wrap items-center gap-3 font-medium">
 
             <span className="flex items-center gap-1">
-              <Building2 className="w-3.5 h-3.5 text-indigo-400" />
-
+              <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
               {report.company}
             </span>
 
             <span className="flex items-center gap-1">
-              <Briefcase className="w-3.5 h-3.5 text-indigo-400" />
-
+              <Briefcase className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
               {report.role}
             </span>
 
             <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-indigo-400" />
-
+              <Calendar className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
               {report.date
                 ? new Date(
                     report.date
@@ -288,48 +284,38 @@ export const ResultPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="relative z-10 flex flex-wrap items-center gap-3">
-
+        <div className="relative z-10 flex flex-wrap items-center gap-3 w-full md:w-auto">
           <button
-            type="button"
-            onClick={
-              handleDownloadPDF
-            }
-            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-500/40 border border-purple-300/40 transform hover:scale-105 transition flex items-center gap-2 cursor-pointer"
+            onClick={handleDownloadPDF}
+            className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-purple-500/30 transition flex items-center justify-center gap-2 transform hover:scale-105 cursor-pointer"
           >
-            <Download className="w-4 h-4" />
-
-            <span>
-              Download PDF Report
-            </span>
+            <Download className="w-4 h-4 shrink-0" />
+            <span>Download PDF Report</span>
           </button>
 
           <Link
             to="/dashboard"
-            className="px-5 py-3.5 rounded-2xl bg-[#1E2138] hover:bg-[#252945] text-purple-200 border border-purple-500/30 font-extrabold text-sm transition flex items-center gap-2 transform hover:scale-105"
+            className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-[#1E2138] hover:bg-[#252945] text-purple-200 border border-purple-500/30 font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2 transform hover:scale-105 cursor-pointer text-center"
           >
-            <LayoutDashboard className="w-4 h-4" />
-
-            <span>
-              Dashboard
-            </span>
+            <LayoutDashboard className="w-4 h-4 shrink-0" />
+            <span>Dashboard</span>
           </Link>
         </div>
       </div>
 
       {/* SCORE + RADAR */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 w-full">
 
         {/* Score Card */}
-        <div className="lg:col-span-5 bg-[#15151A] border-2 border-cyan-400/50 hover:border-cyan-300 rounded-3xl p-8 shadow-xl shadow-cyan-950/60 hover:shadow-2xl hover:shadow-cyan-500/30 relative overflow-hidden group flex flex-col items-center text-center justify-center gap-6 transform hover:-translate-y-2.5 hover:scale-[1.02] transition-all duration-500 cursor-pointer">
+        <div className="lg:col-span-5 bg-[#15151A] border-2 border-cyan-400/50 hover:border-cyan-300 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl shadow-cyan-950/60 hover:shadow-2xl hover:shadow-cyan-500/30 relative overflow-hidden group flex flex-col items-center text-center justify-center gap-6 transform hover:-translate-y-2 hover:scale-[1.01] transition-all duration-500 cursor-pointer w-full">
           {/* Dynamic color background fill overlay that smoothly fades out on mouse enter */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#121B38] via-[#15172C] to-[#0F111E] group-hover:opacity-20 transition-opacity duration-500 pointer-events-none" />
           {/* Top glowing light beam */}
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-          <div className="relative z-10 w-32 h-32 rounded-full border-8 border-cyan-400 flex flex-col items-center justify-center bg-gradient-to-br from-cyan-500/20 via-indigo-500/20 to-transparent shadow-lg shadow-cyan-500/30 transform group-hover:scale-110 transition-transform duration-500">
+          <div className="relative z-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full border-8 border-cyan-400 flex flex-col items-center justify-center bg-gradient-to-br from-cyan-500/20 via-indigo-500/20 to-transparent shadow-lg shadow-cyan-500/30 transform group-hover:scale-110 transition-transform duration-500 shrink-0">
 
-            <span className="text-4xl font-black text-cyan-300">
+            <span className="text-3xl sm:text-4xl font-black text-cyan-300">
               {report.overallScore}%
             </span>
 
@@ -338,7 +324,7 @@ export const ResultPage: React.FC = () => {
             </span>
           </div>
 
-          <div className="relative z-10">
+          <div className="relative z-10 w-full">
             <ScoreBadge
               score={
                 report.overallScore
@@ -354,7 +340,7 @@ export const ResultPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="relative z-10 p-4 rounded-2xl bg-gradient-to-r from-indigo-950/80 to-purple-950/60 border border-indigo-400/40 text-xs text-indigo-100 text-left italic leading-relaxed shadow-md">
+          <div className="relative z-10 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-indigo-950/80 to-purple-950/60 border border-indigo-400/40 text-xs text-indigo-100 text-left italic leading-relaxed shadow-md w-full">
 
             <span className="font-extrabold text-indigo-300 not-italic block mb-1">
               Executive AI Remark:
@@ -368,20 +354,19 @@ export const ResultPage: React.FC = () => {
         </div>
 
         {/* Competency Radar Chart Card */}
-        <div className="lg:col-span-7 bg-[#15151A] border-2 border-purple-500/40 hover:border-purple-300 rounded-3xl p-8 shadow-xl shadow-purple-950/60 hover:shadow-2xl hover:shadow-purple-500/30 relative overflow-hidden group flex flex-col gap-4 transform hover:-translate-y-2.5 hover:scale-[1.02] transition-all duration-500 cursor-pointer">
+        <div className="lg:col-span-7 bg-[#15151A] border-2 border-purple-500/40 hover:border-purple-300 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl shadow-purple-950/60 hover:shadow-2xl hover:shadow-purple-500/30 relative overflow-hidden group flex flex-col gap-4 transform hover:-translate-y-2 hover:scale-[1.01] transition-all duration-500 cursor-pointer w-full">
           {/* Dynamic color background fill overlay that smoothly fades out on mouse enter */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#1A183B] via-[#15162B] to-[#111322] group-hover:opacity-20 transition-opacity duration-500 pointer-events-none" />
           {/* Top glowing light beam */}
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-purple-300/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col gap-4">
+          <div className="relative z-10 flex flex-col gap-4 w-full">
             <h3 className="text-base font-black text-white flex items-center gap-2">
-              <Award className="w-5 h-5 text-purple-400" />
-
+              <Award className="w-5 h-5 text-purple-400 shrink-0" />
               Competency Analysis
             </h3>
 
-            <p className="text-xs text-purple-200/90 font-medium">
+            <p className="text-xs text-purple-200/90 font-medium leading-relaxed">
               Evaluation across technical
               knowledge, communication,
               problem solving and confidence.
@@ -397,20 +382,18 @@ export const ResultPage: React.FC = () => {
       </div>
 
       {/* STRENGTHS / WEAKNESSES / TIPS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 w-full">
 
         {/* Strengths */}
-        <div className="p-6 rounded-3xl bg-[#15151A] border-2 border-emerald-400/50 hover:border-emerald-300 shadow-xl shadow-emerald-950/60 hover:shadow-2xl hover:shadow-emerald-500/40 relative overflow-hidden group flex flex-col gap-4 transform hover:-translate-y-3 hover:scale-[1.03] transition-all duration-500 cursor-pointer">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#15151A] border-2 border-emerald-400/50 hover:border-emerald-300 shadow-xl shadow-emerald-950/60 hover:shadow-2xl hover:shadow-emerald-500/40 relative overflow-hidden group flex flex-col gap-4 transform hover:-translate-y-2 hover:scale-[1.01] transition-all duration-500 cursor-pointer w-full">
           {/* Dynamic color background fill overlay that smoothly fades out on mouse enter */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#0F2824] via-[#122224] to-[#0F111E] group-hover:opacity-20 transition-opacity duration-500 pointer-events-none" />
           {/* Top glowing light beam */}
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-300/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col gap-4">
+          <div className="relative z-10 flex flex-col gap-4 w-full">
             <h3 className="text-sm font-black text-emerald-300 flex items-center gap-2 uppercase tracking-wider">
-
-              <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-
+              <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
               Top Strengths
             </h3>
 

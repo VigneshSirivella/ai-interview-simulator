@@ -317,6 +317,9 @@ export const LoginPage: React.FC = () => {
         },
       });
 
+      const containerWidth = googleButtonRef.current?.parentElement?.clientWidth || 280;
+      const targetWidth = Math.max(240, Math.min(containerWidth - 10, 300));
+
       window.google.accounts.id.renderButton(googleButtonRef.current, {
         type: "standard",
         theme: "outline",
@@ -324,7 +327,7 @@ export const LoginPage: React.FC = () => {
         text: "signin_with",
         shape: "rectangular",
         logo_alignment: "left",
-        width: 300,
+        width: targetWidth,
       });
     };
 

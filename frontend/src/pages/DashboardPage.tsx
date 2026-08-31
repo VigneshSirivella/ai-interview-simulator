@@ -214,7 +214,7 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-[1536px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-5 sm:py-6 lg:py-8 flex flex-col gap-6 sm:gap-7 lg:gap-8 overflow-x-hidden">
+    <div className="max-w-[1536px] w-full mx-auto px-3 sm:px-6 lg:px-8 xl:px-10 py-4 sm:py-6 lg:py-8 flex flex-col gap-5 sm:gap-7 lg:gap-8 min-w-0">
       {error && (
         <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-2">
@@ -554,38 +554,38 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {chartData.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 sm:p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 my-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 p-3 sm:p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 my-2">
               <div
                 onMouseEnter={() => playDashboardChime(550)}
-                className="flex flex-col p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
+                className="flex flex-col p-2.5 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
               >
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Average Score</span>
-                <span className="text-2xl font-black text-indigo-400 mt-1">{averageScore}%</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">Avg Score</span>
+                <span className="text-xl sm:text-2xl font-black text-indigo-400 mt-1">{averageScore}%</span>
               </div>
               <div
                 onMouseEnter={() => playDashboardChime(650)}
-                className="flex flex-col p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
+                className="flex flex-col p-2.5 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
               >
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Peak Score</span>
-                <span className="text-2xl font-black text-emerald-400 mt-1">{highestScore}%</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">Peak Score</span>
+                <span className="text-xl sm:text-2xl font-black text-emerald-400 mt-1">{highestScore}%</span>
               </div>
               <div
                 onMouseEnter={() => playDashboardChime(750)}
-                className="flex flex-col p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
+                className="flex flex-col p-2.5 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
               >
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Sessions</span>
-                <span className="text-2xl font-black text-purple-400 mt-1">{interviewHistory.length}</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sessions</span>
+                <span className="text-xl sm:text-2xl font-black text-purple-400 mt-1">{interviewHistory.length}</span>
               </div>
               <div
                 onMouseEnter={() => playDashboardChime(850)}
-                className="flex flex-col p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
+                className="flex flex-col p-2.5 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
               >
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Score Trend</span>
-                <span className={`text-2xl font-black mt-1 flex items-center gap-1 ${
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">Trend</span>
+                <span className={`text-xl sm:text-2xl font-black mt-1 flex items-center gap-1 ${
                   scoreTrend >= 0 ? "text-emerald-400" : "text-amber-400"
                 }`}>
                   {scoreTrend >= 0 ? `+${scoreTrend}%` : `${scoreTrend}%`}
-                  <span className="text-sm">{scoreTrend >= 0 ? "▲" : "▼"}</span>
+                  <span className="text-xs sm:text-sm">{scoreTrend >= 0 ? "▲" : "▼"}</span>
                 </span>
               </div>
             </div>
@@ -600,7 +600,7 @@ export const DashboardPage: React.FC = () => {
               buttonLink="/setup"
             />
           ) : (
-            <div className="h-72 sm:h-80 md:h-96 lg:h-[380px] xl:h-[420px] w-full pt-4 flex-1 min-h-[320px]">
+            <div className="h-64 sm:h-80 md:h-96 lg:h-[380px] xl:h-[420px] w-full pt-4 flex-1 min-h-[250px] sm:min-h-[320px] min-w-0">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 15, right: 15, left: -10, bottom: 5 }}>
                   <defs>
@@ -656,7 +656,7 @@ export const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        <div className="lg:col-span-5 xl:col-span-5 p-5 sm:p-6 lg:p-7 rounded-3xl glass-card border border-slate-200 dark:border-slate-800/80 shadow-xl flex flex-col gap-6 transform hover:-translate-y-2.5 hover:scale-[1.015] hover:border-purple-500/50 hover:shadow-purple-500/25 transition-all duration-500 group relative overflow-hidden cursor-pointer">
+        <div className="lg:col-span-5 xl:col-span-5 p-3.5 sm:p-6 lg:p-7 rounded-3xl glass-card border border-slate-200 dark:border-slate-800/80 shadow-xl flex flex-col gap-6 transform hover:-translate-y-2.5 hover:scale-[1.015] hover:border-purple-500/50 hover:shadow-purple-500/25 transition-all duration-500 group relative overflow-hidden cursor-pointer w-full">
           {/* Top glowing light beam when box opens/moves forward */}
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-purple-300 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
           <div>
@@ -670,7 +670,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {!hasEvaluatedData ? (
-            <div className="min-h-56 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/30 flex flex-col items-center justify-center text-center p-6">
+            <div className="min-h-56 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/30 flex flex-col items-center justify-center text-center p-4 sm:p-6">
               <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                 <Sparkles className="w-6 h-6" />
               </div>
@@ -686,8 +686,8 @@ export const DashboardPage: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-5">
-              <div>
+            <div className="flex flex-col gap-5 w-full">
+              <div className="w-full">
                 <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" />
                   Strong Topics
@@ -698,13 +698,13 @@ export const DashboardPage: React.FC = () => {
                     No strong topics identified yet.
                   </p>
                 ) : (
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 w-full">
                     {strongTopics.map(
                       (topic, index) => (
                         <div
                           key={`${topic}-${index}`}
                           onMouseEnter={() => playDashboardChime(700)}
-                          className="relative overflow-hidden py-2.5 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-200 text-xs font-semibold flex items-start gap-2.5 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-teal-600 hover:text-white hover:border-emerald-400 hover:shadow-md hover:shadow-emerald-500/20 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group/topic"
+                          className="relative overflow-hidden py-2.5 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-200 text-xs font-semibold flex items-start gap-2.5 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-teal-600 hover:text-white hover:border-emerald-400 hover:shadow-md hover:shadow-emerald-500/20 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group/topic w-full"
                         >
                           {/* Opening vertical line accent on left border */}
                           <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-300 rounded-l-xl scale-y-0 group-hover/topic:scale-y-100 transition-transform duration-200 origin-center" />
@@ -720,7 +720,7 @@ export const DashboardPage: React.FC = () => {
 
               <hr className="border-slate-100 dark:border-slate-800" />
 
-              <div>
+              <div className="w-full">
                 <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
                   <AlertTriangle className="w-4 h-4" />
                   Recommended Focus Areas
@@ -731,13 +731,13 @@ export const DashboardPage: React.FC = () => {
                     No improvement areas identified yet.
                   </p>
                 ) : (
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 w-full">
                     {weakTopics.map(
                       (topic, index) => (
                         <div
                           key={`${topic}-${index}`}
                           onMouseEnter={() => playDashboardChime(500)}
-                          className="relative overflow-hidden py-2.5 px-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-200 text-xs font-semibold flex items-start gap-2.5 hover:bg-gradient-to-r hover:from-rose-600 hover:to-pink-600 hover:text-white hover:border-rose-400 hover:shadow-md hover:shadow-rose-500/20 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group/topic"
+                          className="relative overflow-hidden py-2.5 px-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-200 text-xs font-semibold flex items-start gap-2.5 hover:bg-gradient-to-r hover:from-rose-600 hover:to-pink-600 hover:text-white hover:border-rose-400 hover:shadow-md hover:shadow-rose-500/20 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group/topic w-full"
                         >
                           {/* Opening vertical line accent on left border */}
                           <div className="absolute left-0 top-0 bottom-0 w-1 bg-rose-300 rounded-l-xl scale-y-0 group-hover/topic:scale-y-100 transition-transform duration-200 origin-center" />
@@ -756,7 +756,7 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Interview History */}
-      <div className="p-5 sm:p-6 lg:p-7 rounded-3xl glass-card border border-slate-200 dark:border-slate-800/80 shadow-xl flex flex-col gap-6 transform hover:-translate-y-2.5 hover:scale-[1.015] hover:border-indigo-500/50 hover:shadow-indigo-500/25 transition-all duration-500 group relative overflow-hidden cursor-pointer">
+      <div className="p-3.5 sm:p-6 lg:p-7 rounded-3xl glass-card border border-slate-200 dark:border-slate-800/80 shadow-xl flex flex-col gap-5 sm:gap-6 transform hover:-translate-y-2.5 hover:scale-[1.015] hover:border-indigo-500/50 hover:shadow-indigo-500/25 transition-all duration-500 group relative overflow-hidden cursor-pointer w-full">
         {/* Top glowing light beam when box opens/moves forward */}
         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-indigo-300 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
         <div>
@@ -780,7 +780,7 @@ export const DashboardPage: React.FC = () => {
             buttonLink="/setup"
           />
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 w-full">
             {interviewHistory.map((interview, index) => (
               <InteractiveHistoryCard key={interview.id} interview={interview} index={index} />
             ))}
@@ -807,13 +807,13 @@ const InteractiveHistoryCard: React.FC<InteractiveHistoryCardProps> = ({ intervi
         playDashboardChime(580);
       }}
       onMouseLeave={() => setIsHovered(false)}
-      className={`p-5 rounded-2xl border transition-all duration-300 transform ${
+      className={`p-3.5 sm:p-5 rounded-2xl border transition-all duration-300 transform w-full ${
         isHovered
           ? "bg-gradient-to-r from-indigo-950/60 via-slate-900 to-indigo-950/60 border-indigo-500/60 shadow-2xl -translate-y-1 scale-[1.01]"
           : "bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800"
       }`}
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
         <div>
           <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
             <span>Interview {index + 1}</span>
@@ -838,16 +838,16 @@ const InteractiveHistoryCard: React.FC<InteractiveHistoryCardProps> = ({ intervi
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-        <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/40 transition-colors">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 mt-3.5 sm:mt-4 w-full">
+        <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/40 transition-colors w-full">
           <p className="text-[10px] uppercase font-bold text-slate-400">Technical</p>
-          <p className="text-lg font-bold text-indigo-500">{interview.technicalScore ?? 0}%</p>
+          <p className="text-lg sm:text-xl font-bold text-indigo-500">{interview.technicalScore ?? 0}%</p>
         </div>
-        <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/40 transition-colors">
+        <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/40 transition-colors w-full">
           <p className="text-[10px] uppercase font-bold text-slate-400">Communication</p>
-          <p className="text-lg font-bold text-emerald-500">{interview.communicationScore ?? 0}%</p>
+          <p className="text-lg sm:text-xl font-bold text-emerald-500">{interview.communicationScore ?? 0}%</p>
         </div>
-        <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-purple-500/40 transition-colors">
+        <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-purple-500/40 transition-colors w-full">
           <p className="text-[10px] uppercase font-bold text-slate-400">Camera</p>
           <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
             {interview.cameraEnabled ? "Enabled" : "Not Used"}
@@ -856,18 +856,18 @@ const InteractiveHistoryCard: React.FC<InteractiveHistoryCardProps> = ({ intervi
       </div>
 
       {interview.feedback && (
-        <div className="mt-4 p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+        <div className="mt-3.5 sm:mt-4 p-3.5 sm:p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 w-full">
           <p className="text-xs font-bold text-indigo-500 mb-1">Final Feedback</p>
-          <p className="text-xs text-slate-700 dark:text-slate-300">{interview.feedback}</p>
+          <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed break-words font-medium">{interview.feedback}</p>
         </div>
       )}
 
       {interview.improvements && interview.improvements.length > 0 && (
-        <div className="mt-4">
+        <div className="mt-3.5 sm:mt-4 w-full">
           <p className="text-xs font-bold text-amber-500 mb-2">Improvements</p>
           <ul className="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1">
             {interview.improvements.map((item: string, improvementIndex: number) => (
-              <li key={improvementIndex}>{item}</li>
+              <li key={improvementIndex} className="break-words leading-relaxed">{item}</li>
             ))}
           </ul>
         </div>
