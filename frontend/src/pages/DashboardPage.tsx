@@ -358,34 +358,34 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Practice Progress Cards with JS Mouse Hover Effects */}
-      <div className="p-5 sm:p-6 lg:p-7 rounded-3xl glass-card border border-slate-200 dark:border-slate-800/80 shadow-xl flex flex-col gap-6 transform hover:-translate-y-2.5 hover:scale-[1.015] hover:border-indigo-500/50 hover:shadow-indigo-500/25 transition-all duration-500 group relative overflow-hidden cursor-pointer">
+      <div className="p-3.5 sm:p-6 lg:p-7 rounded-3xl glass-card border border-slate-200 dark:border-slate-800/80 shadow-xl flex flex-col gap-5 sm:gap-6 transform hover:-translate-y-2.5 hover:scale-[1.015] hover:border-indigo-500/50 hover:shadow-indigo-500/25 transition-all duration-500 group relative overflow-hidden cursor-pointer w-full min-w-0 box-border">
         {/* Top glowing light beam when box opens/moves forward */}
         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-indigo-300 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full min-w-0">
+          <div className="min-w-0 flex-1">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Zap className="w-5 h-5 text-indigo-500" /> Practice Progress
+              <Zap className="w-5 h-5 text-indigo-500 shrink-0" /> Practice Progress
             </h3>
 
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
               Your performance from solved Practice Lab questions. Hover cards to activate audio & color transitions.
             </p>
           </div>
 
           <Link
             to="/practice"
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all hover:scale-105"
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all hover:scale-105 shrink-0 self-start sm:self-auto"
           >
             Go to Practice Lab
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-5 w-full min-w-0">
 
           <div
             onMouseEnter={() => playDashboardChime(500)}
-            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-slate-800 hover:to-slate-950 hover:text-white hover:border-slate-600 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group"
+            className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-slate-800 hover:to-slate-950 hover:text-white hover:border-slate-600 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group w-full min-w-0 box-border"
           >
             <p className="text-[11px] uppercase font-bold text-slate-400 group-hover:text-slate-200">
               Total Solved
@@ -398,7 +398,7 @@ export const DashboardPage: React.FC = () => {
 
           <div
             onMouseEnter={() => playDashboardChime(580)}
-            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-indigo-600 hover:to-purple-700 hover:text-white hover:border-indigo-400 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group"
+            className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-indigo-600 hover:to-purple-700 hover:text-white hover:border-indigo-400 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group w-full min-w-0 box-border"
           >
             <p className="text-[11px] uppercase font-bold text-slate-400 group-hover:text-indigo-100">
               Average Score
@@ -411,7 +411,7 @@ export const DashboardPage: React.FC = () => {
 
           <div
             onMouseEnter={() => playDashboardChime(640)}
-            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-emerald-600 hover:to-teal-700 hover:text-white hover:border-emerald-400 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group"
+            className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-emerald-600 hover:to-teal-700 hover:text-white hover:border-emerald-400 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group w-full min-w-0 box-border"
           >
             <p className="text-[11px] uppercase font-bold text-emerald-500 group-hover:text-emerald-100">
               Easy
@@ -428,7 +428,7 @@ export const DashboardPage: React.FC = () => {
 
           <div
             onMouseEnter={() => playDashboardChime(720)}
-            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-indigo-600 hover:to-blue-700 hover:text-white hover:border-indigo-400 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group"
+            className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-indigo-600 hover:to-blue-700 hover:text-white hover:border-indigo-400 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group w-full min-w-0 box-border"
           >
             <p className="text-[11px] uppercase font-bold text-indigo-500 group-hover:text-indigo-100">
               Medium
@@ -445,7 +445,7 @@ export const DashboardPage: React.FC = () => {
 
           <div
             onMouseEnter={() => playDashboardChime(800)}
-            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-rose-600 hover:to-red-700 hover:text-white hover:border-rose-400 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group"
+            className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-gradient-to-br hover:from-rose-600 hover:to-red-700 hover:text-white hover:border-rose-400 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer group w-full min-w-0 box-border"
           >
             <p className="text-[11px] uppercase font-bold text-rose-500 group-hover:text-rose-100">
               Hard
@@ -462,12 +462,12 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {recentPracticeAttempts.length > 0 && (
-          <div>
+          <div className="w-full min-w-0">
             <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-3">
               Recent Practice Attempts
             </h4>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 w-full min-w-0">
               {recentPracticeAttempts.map((attempt) => (
                 <Link
                   key={attempt.id}
@@ -475,14 +475,14 @@ export const DashboardPage: React.FC = () => {
                   to={`/practice?question=${encodeURIComponent(
                     attempt.questionId
                   )}`}
-                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-indigo-500 hover:bg-gradient-to-r hover:from-indigo-950/40 hover:to-purple-950/40 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+                  className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full min-w-0 box-border hover:border-indigo-500 hover:bg-gradient-to-r hover:from-indigo-950/40 hover:to-purple-950/40 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
                 >
-                  <div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
                       {attempt.questionTitle}
                     </p>
 
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-slate-500 mt-1 truncate sm:whitespace-normal">
                       {attempt.topicOrLanguage || "General"} •{" "}
                       {attempt.questionType} •{" "}
                       {attempt.difficulty}
@@ -506,27 +506,27 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Performance and topic insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-        <div className="lg:col-span-7 xl:col-span-7 p-5 sm:p-6 lg:p-7 rounded-3xl glass-card border border-slate-200 dark:border-slate-800/80 shadow-xl flex flex-col justify-between gap-5 transform hover:-translate-y-2.5 hover:scale-[1.015] hover:border-indigo-500/50 hover:shadow-indigo-500/25 transition-all duration-500 group relative overflow-hidden cursor-pointer">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 w-full min-w-0">
+        <div className="lg:col-span-7 xl:col-span-7 p-3.5 sm:p-6 lg:p-7 rounded-3xl glass-card border border-slate-200 dark:border-slate-800/80 shadow-xl flex flex-col justify-between gap-4 sm:gap-5 transform hover:-translate-y-2.5 hover:scale-[1.015] hover:border-indigo-500/50 hover:shadow-indigo-500/25 transition-all duration-500 group relative overflow-hidden cursor-pointer w-full min-w-0 box-border">
           {/* Top glowing light beam when box opens/moves forward */}
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-indigo-300 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 w-full min-w-0">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate">
                   Performance Score History
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 text-[10px] font-black uppercase tracking-wider shrink-0">
                   Live Analytics
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                 Evaluation trajectory across your completed mock interview sessions
               </p>
             </div>
 
             {chartData.length > 0 && (
-              <div className="flex items-center bg-slate-100 dark:bg-slate-900/80 p-1 rounded-xl text-xs font-bold self-start border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center bg-slate-100 dark:bg-slate-900/80 p-1 rounded-xl text-xs font-bold self-start sm:self-auto border border-slate-200 dark:border-slate-800 shrink-0">
                 <button
                   type="button"
                   onClick={() => setChartTimeframe("weekly")}
@@ -554,34 +554,34 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {chartData.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 p-3 sm:p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 my-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 p-3 sm:p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 my-1 sm:my-2 w-full min-w-0 box-border">
               <div
                 onMouseEnter={() => playDashboardChime(550)}
-                className="flex flex-col p-2.5 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
+                className="flex flex-col p-2 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer min-w-0"
               >
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">Avg Score</span>
-                <span className="text-xl sm:text-2xl font-black text-indigo-400 mt-1">{averageScore}%</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Avg Score</span>
+                <span className="text-lg sm:text-2xl font-black text-indigo-400 mt-0.5 sm:mt-1">{averageScore}%</span>
               </div>
               <div
                 onMouseEnter={() => playDashboardChime(650)}
-                className="flex flex-col p-2.5 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
+                className="flex flex-col p-2 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer min-w-0"
               >
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">Peak Score</span>
-                <span className="text-xl sm:text-2xl font-black text-emerald-400 mt-1">{highestScore}%</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Peak Score</span>
+                <span className="text-lg sm:text-2xl font-black text-emerald-400 mt-0.5 sm:mt-1">{highestScore}%</span>
               </div>
               <div
                 onMouseEnter={() => playDashboardChime(750)}
-                className="flex flex-col p-2.5 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
+                className="flex flex-col p-2 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer min-w-0"
               >
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sessions</span>
-                <span className="text-xl sm:text-2xl font-black text-purple-400 mt-1">{interviewHistory.length}</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Sessions</span>
+                <span className="text-lg sm:text-2xl font-black text-purple-400 mt-0.5 sm:mt-1">{interviewHistory.length}</span>
               </div>
               <div
                 onMouseEnter={() => playDashboardChime(850)}
-                className="flex flex-col p-2.5 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer"
+                className="flex flex-col p-2 sm:p-3 rounded-xl transition-all duration-200 hover:bg-slate-800/80 hover:scale-105 cursor-pointer min-w-0"
               >
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">Trend</span>
-                <span className={`text-xl sm:text-2xl font-black mt-1 flex items-center gap-1 ${
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">Trend</span>
+                <span className={`text-lg sm:text-2xl font-black mt-0.5 sm:mt-1 flex items-center gap-1 ${
                   scoreTrend >= 0 ? "text-emerald-400" : "text-amber-400"
                 }`}>
                   {scoreTrend >= 0 ? `+${scoreTrend}%` : `${scoreTrend}%`}
@@ -600,9 +600,9 @@ export const DashboardPage: React.FC = () => {
               buttonLink="/setup"
             />
           ) : (
-            <div className="h-64 sm:h-80 md:h-96 lg:h-[380px] xl:h-[420px] w-full pt-4 flex-1 min-h-[250px] sm:min-h-[320px] min-w-0">
+            <div className="h-64 sm:h-80 md:h-96 lg:h-[380px] xl:h-[420px] w-full pt-3 sm:pt-4 flex-1 min-h-[240px] sm:min-h-[320px] min-w-0 box-border">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 15, right: 15, left: -10, bottom: 5 }}>
+                <AreaChart data={chartData} margin={{ top: 15, right: 10, left: -22, bottom: 5 }}>
                   <defs>
                     <linearGradient id="scoreColor" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#6366f1" stopOpacity={0.5} />
@@ -610,11 +610,11 @@ export const DashboardPage: React.FC = () => {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.25} />
-                  <XAxis dataKey="day" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={{ stroke: "#334155" }} />
+                  <XAxis dataKey="day" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={{ stroke: "#334155" }} />
                   <YAxis
                     domain={[Math.max(0, Math.floor(minScore / 10) * 10 - 10), 100]}
                     stroke="#94a3b8"
-                    fontSize={12}
+                    fontSize={11}
                     tickFormatter={(val) => `${val}%`}
                     tickLine={false}
                     axisLine={{ stroke: "#334155" }}

@@ -473,28 +473,28 @@ export const LeaderboardPage: React.FC = () => {
       </div>
 
       {/* ACHIEVEMENTS & UNLOCKABLE BADGES SHOWCASE GALLERY WITH COLOR CHANGING HOVER EFFECTS */}
-      <div className="p-5 sm:p-6 lg:p-8 rounded-3xl bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-3">
-          <div>
+      <div className="p-3.5 sm:p-6 lg:p-8 rounded-3xl bg-white dark:bg-[#15151A] border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col gap-5 sm:gap-6 w-full min-w-0 box-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-3 w-full min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-bold uppercase tracking-wider mb-1">
-              <Award className="w-3.5 h-3.5" /> Interactive Badge Collection
+              <Award className="w-3.5 h-3.5 shrink-0" /> Interactive Badge Collection
             </div>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+            <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">
               Unlockable Candidate Badges & Rewards
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
               Hover mouse over any badge card to see dynamic color transformations, detail popups, and sound chimes!
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-            <Flame className="w-4 h-4 text-rose-500 animate-bounce" />
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0 self-start sm:self-auto">
+            <Flame className="w-4 h-4 text-rose-500 animate-bounce shrink-0" />
             <span>{achievements.filter(a => a.unlocked).length} / {achievements.length} Badges Unlocked</span>
           </div>
         </div>
 
         {/* BADGES GALLERY GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 w-full min-w-0">
           {[
             {
               id: "b_1",
@@ -572,28 +572,28 @@ export const LeaderboardPage: React.FC = () => {
             <div
               key={badge.id}
               onMouseEnter={() => playBadgeChime()}
-              className={`p-5 rounded-2xl border flex flex-col justify-between gap-4 transition-all duration-300 transform hover:-translate-y-2 hover:scale-[1.03] shadow-md hover:shadow-2xl group cursor-pointer ${badge.baseStyle} ${badge.hoverStyle}`}
+              className={`p-3.5 sm:p-5 rounded-2xl border flex flex-col justify-between gap-3.5 sm:gap-4 transition-all duration-300 transform hover:-translate-y-1.5 hover:scale-[1.02] shadow-md hover:shadow-2xl group cursor-pointer w-full min-w-0 box-border ${badge.baseStyle} ${badge.hoverStyle}`}
             >
-              <div className="flex items-start justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-2xl shadow-md border border-slate-200 dark:border-slate-700 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+              <div className="flex items-start justify-between gap-2 w-full min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-xl sm:text-2xl shadow-md border border-slate-200 dark:border-slate-700 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shrink-0">
                   {badge.icon}
                 </div>
                 {badge.unlocked ? (
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-white group-hover:text-emerald-700 border border-emerald-500/30 text-[10px] font-black uppercase flex items-center gap-1 shadow-sm">
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-white group-hover:text-emerald-700 border border-emerald-500/30 text-[10px] font-black uppercase flex items-center gap-1 shadow-sm shrink-0">
                     <CheckCircle2 className="w-3 h-3" /> Unlocked
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 text-[10px] font-bold">
+                  <span className="px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 text-[10px] font-bold shrink-0">
                     Locked
                   </span>
                 )}
               </div>
 
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider opacity-75 group-hover:opacity-100">
+              <div className="min-w-0 w-full">
+                <span className="text-[10px] font-black uppercase tracking-wider opacity-75 group-hover:opacity-100 block">
                   {badge.category}
                 </span>
-                <h4 className="font-extrabold text-base text-slate-900 dark:text-white group-hover:text-white mt-0.5 transition-colors">
+                <h4 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-white mt-0.5 transition-colors truncate">
                   {badge.title}
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-400 group-hover:text-slate-100 mt-1 leading-relaxed transition-colors">
@@ -601,10 +601,10 @@ export const LeaderboardPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-slate-200 dark:border-slate-800/80 group-hover:border-white/20 flex flex-col gap-1.5">
-                <div className="flex justify-between text-[11px] font-semibold text-slate-500 group-hover:text-slate-200">
-                  <span>Requirement: {badge.req}</span>
-                  <span>{badge.progress}%</span>
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800/80 group-hover:border-white/20 flex flex-col gap-1.5 w-full min-w-0">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 group-hover:text-slate-200 w-full min-w-0 gap-2">
+                  <span className="truncate">Requirement: {badge.req}</span>
+                  <span className="shrink-0">{badge.progress}%</span>
                 </div>
                 <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 group-hover:bg-black/20 rounded-full overflow-hidden">
                   <div
