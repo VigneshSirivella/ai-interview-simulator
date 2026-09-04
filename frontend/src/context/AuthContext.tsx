@@ -174,14 +174,6 @@ export const AuthProvider: React.FC<{
           localStorage.getItem("user_custom_avatar") ||
           user?.profilePicture ||
           undefined,
-
-        githubUrl:
-          profile.github ||
-          user?.githubUrl,
-
-        linkedinUrl:
-          profile.linkedin ||
-          user?.linkedinUrl,
       };
 
       setUser(updatedUser);
@@ -292,6 +284,22 @@ export const AuthProvider: React.FC<{
           credential
         );
 
+      if (
+        !response ||
+        typeof response.access !== "string" ||
+        !response.access.trim() ||
+        typeof response.refresh !== "string" ||
+        !response.refresh.trim() ||
+        !response.user ||
+        typeof response.user.id !== "number" ||
+        typeof response.user.email !== "string" ||
+        !response.user.email.trim()
+      ) {
+        throw new Error(
+          "Invalid authentication response received from backend server."
+        );
+      }
+
       localStorage.setItem(
         "auth_token",
         response.access
@@ -311,7 +319,7 @@ export const AuthProvider: React.FC<{
 
       const loggedInUser: User = {
         id: String(response.user.id),
-        name: response.user.name,
+        name: response.user.name || response.user.email.split("@")[0],
         email: response.user.email,
         targetRole: "Software Engineer",
       };
@@ -319,7 +327,7 @@ export const AuthProvider: React.FC<{
       setUser(loggedInUser);
 
       addToast(
-        `Welcome, ${response.user.name}!`,
+        `Welcome, ${response.user.name || response.user.email}!`,
         "success"
       );
 
@@ -403,14 +411,6 @@ export const AuthProvider: React.FC<{
         );
       }
 
-      if (updatedData.githubUrl !== undefined) {
-        formData.append("github", updatedData.githubUrl);
-      }
-
-      if (updatedData.linkedinUrl !== undefined) {
-        formData.append("linkedin", updatedData.linkedinUrl);
-      }
-
       if (updatedData.profileFile) {
         formData.append(
           "profile_picture",
@@ -434,8 +434,6 @@ export const AuthProvider: React.FC<{
           updatedData.profilePicture ||
           user?.profilePicture ||
           undefined,
-        githubUrl: profile.github || "",
-        linkedinUrl: profile.linkedin || "",
         targetRole:
           updatedData.targetRole ||
           user?.targetRole ||

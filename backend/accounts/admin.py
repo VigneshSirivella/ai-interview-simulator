@@ -42,12 +42,6 @@ class CustomUserAdmin(UserAdmin):
                     "full_name",
                     "email",
                     "phone",
-                    "college",
-                    "degree",
-                    "specialization",
-                    "graduation_year",
-                    "github",
-                    "linkedin",
                     "profile_picture",
                     "resume",
                 )

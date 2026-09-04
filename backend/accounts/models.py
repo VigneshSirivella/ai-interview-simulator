@@ -9,18 +9,6 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
 
     phone = models.CharField(max_length=30, blank=True, default="")
-
-    college = models.CharField(max_length=255, blank=True, default="")
-
-    degree = models.CharField(max_length=100, blank=True, default="")
-
-    specialization = models.CharField(max_length=100, blank=True, default="")
-
-    graduation_year = models.CharField(max_length=10, blank=True, default="")
-
-    github = models.URLField(blank=True)
-
-    linkedin = models.URLField(blank=True)
     preferred_language = models.CharField(
         max_length=50,
         blank=True,

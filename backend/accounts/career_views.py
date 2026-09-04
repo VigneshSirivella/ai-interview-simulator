@@ -31,14 +31,15 @@ def extract_github_username(github_url):
 @permission_classes([IsAuthenticated])
 def career_intelligence(request):
     user = request.user
+    github_url = request.query_params.get("github") or getattr(user, "github", "")
 
-    if not user.github:
+    if not github_url:
         return Response(
             {"error": "Add your GitHub profile URL first."},
             status=400,
         )
 
-    username = extract_github_username(user.github)
+    username = extract_github_username(github_url)
 
     if not username:
         return Response(
@@ -116,6 +117,10 @@ def career_intelligence(request):
             "repositories": repositories,
         }
 
+        linkedin_url = request.query_params.get("linkedin") or getattr(
+            user, "linkedin", ""
+        )
+
         prompt = f"""
 You are an expert software engineering career advisor.
 
@@ -129,7 +134,7 @@ GitHub Profile:
 {json.dumps(github_data, indent=2)}
 
 LinkedIn URL:
-{user.linkedin or "Not provided"}
+{linkedin_url or "Not provided"}
 
 Return ONLY valid JSON using exactly this structure:
 

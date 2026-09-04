@@ -8,16 +8,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     phone = serializers.CharField(required=False, allow_blank=True, default="")
 
-    college = serializers.CharField(required=False, allow_blank=True, default="")
-
-    degree = serializers.CharField(required=False, allow_blank=True, default="")
-
-    specialization = serializers.CharField(required=False, allow_blank=True, default="")
-
-    graduation_year = serializers.CharField(
-        required=False, allow_blank=True, default=""
-    )
-
     class Meta:
         model = User
 
@@ -26,10 +16,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             "email",
             "password",
             "phone",
-            "college",
-            "degree",
-            "specialization",
-            "graduation_year",
         ]
 
     def validate_email(self, value):
@@ -51,19 +37,12 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=email,
             full_name=validated_data.get("full_name", "").strip(),
             phone=validated_data.get("phone", ""),
-            college=validated_data.get("college", ""),
-            degree=validated_data.get("degree", ""),
-            specialization=validated_data.get("specialization", ""),
-            graduation_year=validated_data.get("graduation_year", ""),
         )
 
         user.set_password(password)
         user.save()
 
         return user
-
-
-from rest_framework import serializers
 
 
 class OTPVerifySerializer(serializers.Serializer):

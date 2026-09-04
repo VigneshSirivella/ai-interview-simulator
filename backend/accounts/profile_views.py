@@ -19,36 +19,6 @@ def profile(request):
             user.phone,
         )
 
-        user.college = request.data.get(
-            "college",
-            user.college,
-        )
-
-        user.degree = request.data.get(
-            "degree",
-            user.degree,
-        )
-
-        user.specialization = request.data.get(
-            "specialization",
-            user.specialization,
-        )
-
-        user.graduation_year = request.data.get(
-            "graduation_year",
-            user.graduation_year,
-        )
-
-        user.github = request.data.get(
-            "github",
-            user.github,
-        )
-
-        user.linkedin = request.data.get(
-            "linkedin",
-            user.linkedin,
-        )
-
         user.preferred_language = request.data.get(
             "preferred_language",
             user.preferred_language,
@@ -74,12 +44,6 @@ def profile(request):
             "full_name": user.full_name,
             "email": user.email,
             "phone": user.phone,
-            "college": user.college,
-            "degree": user.degree,
-            "specialization": user.specialization,
-            "graduation_year": user.graduation_year,
-            "github": user.github,
-            "linkedin": user.linkedin,
             "preferred_language": user.preferred_language,
             "profile_picture": profile_picture,
         }

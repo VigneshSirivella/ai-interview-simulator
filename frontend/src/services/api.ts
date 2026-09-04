@@ -116,10 +116,6 @@ export interface RegisterData {
   password: string;
 
   phone?: string;
-  college?: string;
-  degree?: string;
-  specialization?: string;
-  graduation_year?: string;
 }
 
 export interface LoginResponse {
@@ -139,12 +135,6 @@ export interface ProfileResponse {
   full_name: string;
   email: string;
   phone?: string;
-  college?: string;
-  degree?: string;
-  specialization?: string;
-  graduation_year?: string;
-  github?: string;
-  linkedin?: string;
   profile_picture?: string;
   preferred_language?: string;
 }

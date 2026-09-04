@@ -37,8 +37,6 @@ export interface User {
   email: string;
   phone?: string;
   profilePicture?: string;
-  githubUrl?: string;
-  linkedinUrl?: string;
   bio?: string;
   targetRole?: string;
   targetCompany?: string;
