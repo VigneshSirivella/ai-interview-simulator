@@ -11,6 +11,7 @@ import {
 } from "../types";
 
 const DJANGO_API =
+  import.meta.env.VITE_DJANGO_API ||
   "https://ai-interview-simulator-docker.onrender.com/api";
 
 

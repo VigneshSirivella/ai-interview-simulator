@@ -1,27 +1,28 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from django.db import transaction
-import random
 import os
+import random
 import uuid
 
+from django.conf import settings
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import update_last_login
+from django.db import IntegrityError, transaction
+from google.auth.exceptions import GoogleAuthError
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
-from google.auth.exceptions import GoogleAuthError
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
 from .serializers import (
-    RegisterSerializer,
-    OTPVerifySerializer,
     ForgotPasswordSerializer,
+    OTPVerifySerializer,
+    RegisterSerializer,
     ResetPasswordSerializer,
 )
 from .utils import send_otp
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
 
 
 @api_view(["POST"])
@@ -104,6 +105,8 @@ def login_user(request):
             status=status.HTTP_403_FORBIDDEN,
         )
 
+    update_last_login(None, user)
+
     refresh = RefreshToken.for_user(user)
 
     return Response(
@@ -185,11 +188,16 @@ def google_login(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+    google_client_id = os.getenv("GOOGLE_CLIENT_ID") or getattr(
+        settings, "GOOGLE_CLIENT_ID", None
+    )
 
     if not google_client_id:
         return Response(
-            {"error": "Google Client ID is not configured"},
+            {
+                "error": "Google Client ID is not configured on the backend server. "
+                "Please configure GOOGLE_CLIENT_ID in the Render environment variables."
+            },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
@@ -201,7 +209,6 @@ def google_login(request):
         )
 
         email = google_user.get("email")
-        full_name = google_user.get("name", "")
         email_verified = google_user.get("email_verified", False)
 
         if not email:
@@ -216,34 +223,90 @@ def google_login(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        email = email.strip().lower()
+        normalized_email = email.strip().lower()
+        full_name = (google_user.get("name") or "").strip()
+        first_name = (google_user.get("given_name") or "").strip()
+        last_name = (google_user.get("family_name") or "").strip()
+
+        if not full_name:
+            full_name = f"{first_name} {last_name}".strip()
+
+        if full_name and not first_name:
+            name_parts = full_name.split(None, 1)
+            first_name = name_parts[0]
+            if len(name_parts) > 1:
+                last_name = name_parts[1]
+
+        if not full_name:
+            email_username = normalized_email.split("@")[0]
+            full_name = email_username
+            if not first_name:
+                first_name = email_username
 
         try:
-            user = User.objects.get(email=email)
+            with transaction.atomic():
+                user = User.objects.filter(
+                    email__iexact=normalized_email
+                ).first()
 
-            user.is_active = True
-            user.otp_verified = True
+                if user:
+                    updated = False
+                    if not user.is_active:
+                        user.is_active = True
+                        updated = True
+                    if not user.otp_verified:
+                        user.otp_verified = True
+                        updated = True
+                    if not user.full_name and full_name:
+                        user.full_name = full_name
+                        updated = True
+                    if not user.first_name and first_name:
+                        user.first_name = first_name
+                        updated = True
+                    if not user.last_name and last_name:
+                        user.last_name = last_name
+                        updated = True
 
-            if not user.full_name and full_name:
-                user.full_name = full_name
+                    if updated:
+                        user.save()
+                else:
+                    email_username = normalized_email.split("@")[0]
+                    base_username = (
+                        email_username[:130] if email_username else "user"
+                    )
+                    username = base_username
 
-            user.save()
+                    if User.objects.filter(username__iexact=username).exists():
+                        username = f"{base_username}_{uuid.uuid4().hex[:8]}"
+                        while User.objects.filter(
+                            username__iexact=username
+                        ).exists():
+                            username = (
+                                f"{base_username}_{uuid.uuid4().hex[:8]}"
+                            )
 
-        except User.DoesNotExist:
-            email_username = email.split("@")[0]
+                    user = User(
+                        username=username,
+                        email=normalized_email,
+                        full_name=full_name,
+                        first_name=first_name,
+                        last_name=last_name,
+                        is_active=True,
+                        otp_verified=True,
+                    )
+                    user.set_unusable_password()
+                    user.save()
 
-            username = f"{email_username}_" f"{uuid.uuid4().hex[:8]}"
+                update_last_login(None, user)
 
-            user = User(
-                username=username,
-                email=email,
-                full_name=full_name or email_username,
-                is_active=True,
-                otp_verified=True,
-            )
-
-            user.set_unusable_password()
-            user.save()
+        except IntegrityError:
+            user = User.objects.filter(
+                email__iexact=normalized_email
+            ).first()
+            if user:
+                update_last_login(None, user)
+            else:
+                raise
 
         refresh = RefreshToken.for_user(user)
 
